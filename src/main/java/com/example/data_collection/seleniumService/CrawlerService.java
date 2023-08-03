@@ -62,12 +62,9 @@ public class CrawlerService {
 
         do{
             crawlCurrentPageData();
-
             moveOnToNextPage();
 
-
-        } while(targetPageNumber <= totalPages);
-
+        } while(targetPageNumber < totalPages);
 
     }
 
@@ -77,7 +74,16 @@ public class CrawlerService {
         List<WebElement> brands = driver.findElements(By.xpath(brandTag));
         List<WebElement> prices = driver.findElements(By.xpath(priceTag));
 
-        for(int i=0; i< productNames.size(); i++){
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        int minSize = Math.min(Math.min(productNames.size(), brands.size()), prices.size());
+
+
+        for(int i=0; i< minSize; i++){
             RawData rawData = new RawData();
 
             rawData.setProductName(productNames.get(i).getText());

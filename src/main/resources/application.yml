@@ -1,9 +1,8 @@
 spring:
+  profiles:
+    active: db
   jpa:
     hibernate:
       ddl-auto: update
   datasource:
-    url: jdbc:mysql://localhost:3306/kinni
-    username: root
-    password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
