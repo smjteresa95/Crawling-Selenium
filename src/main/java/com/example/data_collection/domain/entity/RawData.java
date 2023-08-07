@@ -25,9 +25,10 @@ public class RawData {
     @Column(name = "price")
     private String price;
 
-//    @Column(name = "image")
-//    private String image;
-//
+    @Column(name = "image")
+    private String image;
+
+
 //    @Column(name="product_link")
 //    private String productLink;
 }

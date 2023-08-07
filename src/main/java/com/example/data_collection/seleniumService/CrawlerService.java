@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -26,19 +27,20 @@ public class CrawlerService {
 
 
     private String pagingTag = "//div[@class='com_paginate notranslate']";
-
     private String currentPageTag = pagingTag + "//strong[@title='현재위치']";
 
 
-    //밀키트
-    private String mealKitUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139913";
 
     //제품 전체정보를 포함하는 상위요소
     private String mealkitProductTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_detail\"]/div[@class=\"mnsditem_maininfo\"]";
     private String mealkitProductNameTag = mealkitProductTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_tit\"]";
     private String mealkitBrandTag = mealkitProductTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_brand\"]";
     private String mealkitPriceTag = mealkitProductTag + "/a/div[@class=\"mnsditem_pricewrap\"]/div[@class=\"mnsditem_price_row mnsditem_ty_newpr\"]/div[@class=\"new_price\"]/em[@class=\"ssg_price\"]";
-    private String imageTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_thmb\"]/div[@class=\"mnsditem_thmb_imgbx\"]/img[@class='i1']";
+    private String imageTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_thmb\"]/a/div[@class=\"mnsditem_thmb_imgbx\"]/img[@class='i1']";
+
+
+    //밀키트
+    private String mealKitUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139913";
 
     //냉장/냉동식품
     private String frozenUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139879";
@@ -62,7 +64,7 @@ public class CrawlerService {
 
 
         while (true) {
-            crawlCurrentPage(mealkitProductNameTag, mealkitBrandTag, mealkitPriceTag);
+            crawlCurrentPage(mealkitProductNameTag, mealkitBrandTag, mealkitPriceTag, imageTag);
 
             // If the current page is a multiple of 10, move to the next group
             if (currentPage % 10 == 0) {
@@ -85,17 +87,21 @@ public class CrawlerService {
     }
 
 
-    public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag){
+    public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag, String imageTag){
 
         List<WebElement> productNames = driver.findElements(By.xpath(productNameTag));
         List<WebElement> brands = driver.findElements(By.xpath(brandTag));
         List<WebElement> prices = driver.findElements(By.xpath(priceTag));
-//        List<WebElement> images = driver.findElements(By.xpath(imageTag));
+        List<WebElement> images = driver.findElements(By.xpath(imageTag));
 
-        int minSize = Math.min(Math.min(productNames.size(), brands.size()), prices.size());
+//        int minSize = Math.min(Math.min(productNames.size(), brands.size()), prices.size());
 
-//        int minSize = Math.min(Math.min(Math.min(productNames.size(), brands.size()), prices.size()), images.size());
+        int minSize = Math.min(Math.min(Math.min(productNames.size(), brands.size()), prices.size()), images.size());
 
+        List<String> imgSrcs = new ArrayList<>();
+        for(WebElement image : images){
+            imgSrcs.add(image.getAttribute("src"));
+        }
 
         for(int i=0; i< minSize; i++){
             RawData rawData = new RawData();
@@ -103,8 +109,7 @@ public class CrawlerService {
             rawData.setProductName(productNames.get(i).getText());
             rawData.setBrand(brands.get(i).getText());
             rawData.setPrice(prices.get(i).getText());
-//            rawData.setImage(images.get(i).getAttribute("src"));
-
+            rawData.setImage(imgSrcs.get(i));
 
             save(rawData);
         }
