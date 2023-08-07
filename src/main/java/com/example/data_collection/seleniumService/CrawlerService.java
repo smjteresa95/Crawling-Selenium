@@ -4,42 +4,44 @@ import com.example.data_collection.domain.entity.RawData;
 import com.example.data_collection.domain.entity.RawDataRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
+import java.util.NoSuchElementException;
+
 
 
 @Service
 public class CrawlerService {
 
-    private final WebDriver driver;
-    private final WebDriverWait wait;
-
+    int currentPage = 1;
+    private WebDriver driver;
+    private WebDriverWait wait;
     private final RawDataRepository rawDataRepository;
 
-    private int targetPageNumber = 2;
 
+    private String pagingTag = "//div[@class='com_paginate notranslate']";
+
+    private String currentPageTag = pagingTag + "//strong[@title='현재위치']";
+
+
+    //밀키트
     private String mealKitUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139913";
 
     //제품 전체정보를 포함하는 상위요소
-    private String productTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_detail\"]/div[@class=\"mnsditem_maininfo\"]";
+    private String mealkitProductTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_detail\"]/div[@class=\"mnsditem_maininfo\"]";
+    private String mealkitProductNameTag = mealkitProductTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_tit\"]";
+    private String mealkitBrandTag = mealkitProductTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_brand\"]";
+    private String mealkitPriceTag = mealkitProductTag + "/a/div[@class=\"mnsditem_pricewrap\"]/div[@class=\"mnsditem_price_row mnsditem_ty_newpr\"]/div[@class=\"new_price\"]/em[@class=\"ssg_price\"]";
+    private String imageTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_thmb\"]/div[@class=\"mnsditem_thmb_imgbx\"]/img[@class='i1']";
 
-    private String productNameTag = productTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_tit\"]";
-
-    private String brandTag = productTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_brand\"]";
-
-    private String priceTag = productTag + "/a/div[@class=\"mnsditem_pricewrap\"]/div[@class=\"mnsditem_price_row mnsditem_ty_newpr\"]/div[@class=\"new_price\"]/em[@class=\"ssg_price\"]";
-
+    //냉장/냉동식품
+    private String frozenUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139879";
 
     @Autowired
     public CrawlerService(WebDriver driver, WebDriverWait wait, RawDataRepository rawDataRepository){
@@ -52,35 +54,47 @@ public class CrawlerService {
         rawDataRepository.save(rawData);
     }
 
+
     @PostConstruct
-    public void crawlAllProductsAndSave(){
+    public void crawlAllProductsAndSave() {
 
-        driver.get(mealKitUrl);
+        driver.get(frozenUrl);
 
-        List<WebElement> pages = driver.findElements(By.xpath("//div[@class='com_paginate notranslate']//a"));
-        int totalPages = pages.size();
 
-        do{
-            crawlCurrentPageData();
-            moveOnToNextPage();
+        while (true) {
+            crawlCurrentPage(mealkitProductNameTag, mealkitBrandTag, mealkitPriceTag);
 
-        } while(targetPageNumber < totalPages);
-
+            // If the current page is a multiple of 10, move to the next group
+            if (currentPage % 10 == 0) {
+                moveOnToNextGroup(); // Click on the 'next' button to move to the next group
+                waitForFiveSeconds();
+            }
+            // For all other pages, move to the next page within the group
+            else {
+                moveToNextPageWithinGroup(); // Click on the 'currentPage + 1' button to move to the next page within the group
+                waitForFiveSeconds();
+            }
+        }
     }
 
-    public void crawlCurrentPageData(){
+
+    private boolean isLastPageWithinGroup(){
+        WebElement currentPageElement = driver.findElement(By.xpath(currentPageTag));
+        int currentPageNumber = Integer.parseInt(currentPageElement.getText());
+        return currentPageNumber % 10 == 0;
+    }
+
+
+    public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag){
 
         List<WebElement> productNames = driver.findElements(By.xpath(productNameTag));
         List<WebElement> brands = driver.findElements(By.xpath(brandTag));
         List<WebElement> prices = driver.findElements(By.xpath(priceTag));
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+//        List<WebElement> images = driver.findElements(By.xpath(imageTag));
 
         int minSize = Math.min(Math.min(productNames.size(), brands.size()), prices.size());
+
+//        int minSize = Math.min(Math.min(Math.min(productNames.size(), brands.size()), prices.size()), images.size());
 
 
         for(int i=0; i< minSize; i++){
@@ -89,30 +103,100 @@ public class CrawlerService {
             rawData.setProductName(productNames.get(i).getText());
             rawData.setBrand(brands.get(i).getText());
             rawData.setPrice(prices.get(i).getText());
+//            rawData.setImage(images.get(i).getAttribute("src"));
+
 
             save(rawData);
         }
+        waitForFiveSeconds();
     }
 
-    public void moveOnToNextPage() {
 
-        String nextPageButtonTag = "//div[@class='com_paginate notranslate']//a[contains(text(), '" + targetPageNumber + "')]";
+    //다음 버튼이 있는지 확인하는 로직추가
+    public boolean isNextButtonExistWithinGroup(){
 
-        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextPageButtonTag)));
+        try {
+            String nextPageButtonXPath = "//div[@class='com_paginate notranslate']//a[contains(text(), '" + currentPage + "')]";
+            driver.findElement(By.xpath(nextPageButtonXPath));
+            return true;
+        } catch(NoSuchElementException e) {
+            return false;
+        }
+    }
 
-        WebElement pageLink = driver.findElement(By.xpath(nextPageButtonTag));
-        pageLink.click();
+    public boolean isNextButtonExist() {
+        try {
+            driver.findElement(By.xpath(pagingTag + "//a[@class='btn_next on' and @title='다음']"));
+            return true;
+        } catch(NoSuchElementException e) {
+            return false;
+        }
+    }
 
-        targetPageNumber++;
 
+    public void moveOnToNextGroup() {
+
+        String pageButtonXPath = pagingTag + "//a[@class='btn_next on' and @title='다음']";
+
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(pageButtonXPath)));
+
+            WebElement pageButton = driver.findElement(By.xpath(pageButtonXPath));
+//            pageButton.click();
+            JavascriptExecutor executor = (JavascriptExecutor)driver;
+            executor.executeScript("arguments[0].click();", pageButton);
+
+            new WebDriverWait(driver, Duration.ofSeconds(10)).until(
+                    webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete")
+            );
+
+            currentPage++;
+
+        } catch (TimeoutException e){
+            System.out.println("No more page to navigate");
+        }
+
+
+    }
+
+
+    public void moveToNextPageWithinGroup(){
+
+        String nextPageButtonXPath = "//div[@class='com_paginate notranslate']//a[contains(text(), '" + (currentPage+1) + "')]";
+
+        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+
+        try {
+            wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextPageButtonXPath)));
+
+            WebElement pageButton = driver.findElement(By.xpath(nextPageButtonXPath));
+            //        pageButton.click();
+            JavascriptExecutor executor = (JavascriptExecutor) driver;
+            executor.executeScript("arguments[0].click();", pageButton);
+
+
+            new WebDriverWait(driver, Duration.ofSeconds(10)).until(
+                    webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete")
+            );
+
+            currentPage++;
+
+        } catch (TimeoutException e){
+            System.out.println("No more page to navigate");
+        }
+    }
+
+    public void waitForFiveSeconds(){
         try {
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
     }
+
+
 
 
     @PreDestroy

@@ -9,8 +9,8 @@ import org.springframework.context.ConfigurableApplicationContext;
 public class DataCollectionApplication {
 
 	public static void main(String[] args) {
-
 		ConfigurableApplicationContext context = SpringApplication.run(DataCollectionApplication.class, args);
+
 	}
 
 }
