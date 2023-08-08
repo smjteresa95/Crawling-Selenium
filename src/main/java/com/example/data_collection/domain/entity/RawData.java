@@ -16,6 +16,9 @@ public class RawData {
     @Column(name = "product_id")
     private long productId;
 
+    @Column(name = "category_name")
+    private String categoryName;
+
     @Column(name = "product_name")
     private String productName;
 
@@ -28,7 +31,12 @@ public class RawData {
     @Column(name = "image")
     private String image;
 
+    @Column(name="product_link")
+    private String productLink;
 
-//    @Column(name="product_link")
-//    private String productLink;
+    @Column(name="rating")
+    private double rating;
+
+    @Column(name = "discount_rate")
+    private String discountRate;
 }

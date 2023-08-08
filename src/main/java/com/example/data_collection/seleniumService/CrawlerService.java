@@ -2,19 +2,20 @@ package com.example.data_collection.seleniumService;
 
 import com.example.data_collection.domain.entity.RawData;
 import com.example.data_collection.domain.entity.RawDataRepository;
+import com.example.data_collection.exception.NoMorePagesException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.openqa.selenium.*;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.NoSuchElementException;
-
 
 
 @Service
@@ -27,23 +28,29 @@ public class CrawlerService {
 
 
     private String pagingTag = "//div[@class='com_paginate notranslate']";
-    private String currentPageTag = pagingTag + "//strong[@title='현재위치']";
-
 
 
     //제품 전체정보를 포함하는 상위요소
-    private String mealkitProductTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_detail\"]/div[@class=\"mnsditem_maininfo\"]";
-    private String mealkitProductNameTag = mealkitProductTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_tit\"]";
-    private String mealkitBrandTag = mealkitProductTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_brand\"]";
-    private String mealkitPriceTag = mealkitProductTag + "/a/div[@class=\"mnsditem_pricewrap\"]/div[@class=\"mnsditem_price_row mnsditem_ty_newpr\"]/div[@class=\"new_price\"]/em[@class=\"ssg_price\"]";
+    private String productTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_detail\"]/div[@class=\"mnsditem_maininfo\"]";
+    private String productNameTag = productTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_tit\"]";
+    private String brandTag = productTag + "/a/div[@class=\"mnsditem_tit\"]/span[@class=\"mnsditem_goods_brand\"]";
+    private String priceTag = productTag + "/a/div[@class=\"mnsditem_pricewrap\"]/div[@class=\"mnsditem_price_row mnsditem_ty_newpr\"]/div[@class=\"new_price\"]/em[@class=\"ssg_price\"]";
     private String imageTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_thmb\"]/a/div[@class=\"mnsditem_thmb_imgbx\"]/img[@class='i1']";
+    private String linkTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_thmb\"]/a[@class=\"mnsditem_thmb_link clickable\"]";
+    private String ratingTag = "//div[@class=\"mnsditem_goods\"]/div[@class=\"mnsditem_detail\"]/div[@class=\"mnsditem_sideinfo\"]/div[@class=\"mnsditem_review\"]/div[@class='mnsditem_review_score']";
+    private String categoryNameTag = "//*[@id=\"area_disp_ctg_title\"]/h2/a[@class=\"notranslate clickable\"]";
 
 
     //밀키트
-    private String mealKitUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139913";
+    private String mealKitCode = "6000139913";
 
     //냉장/냉동식품
-    private String frozenUrl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=6000139879";
+    private String frozenCode = "6000139879";
+
+    //도시락/델리
+    private String deliCode = "6000139914";
+
+    private String ssgurl = "https://shinsegaemall.ssg.com/disp/category.ssg?dispCtgId=";
 
     @Autowired
     public CrawlerService(WebDriver driver, WebDriverWait wait, RawDataRepository rawDataRepository){
@@ -58,13 +65,35 @@ public class CrawlerService {
 
 
     @PostConstruct
-    public void crawlAllProductsAndSave() {
+    public void startCrawling(){
+        crawlAllProductsByCategory();
+    }
 
-        driver.get(frozenUrl);
+    public void crawlAllProductsByCategory(){
 
+        List<String> categoryCodes = Arrays.asList(mealKitCode, frozenCode, deliCode);
 
-        while (true) {
-            crawlCurrentPage(mealkitProductNameTag, mealkitBrandTag, mealkitPriceTag, imageTag);
+        for (String code : categoryCodes) {
+
+            driver.get(ssgurl+code);
+            currentPage = 1;
+
+            while(true) {
+
+                try {
+                    crawlProductsAndSave();
+                } catch (NoMorePagesException e){
+                    break;
+                }
+
+            }
+
+        }
+    }
+
+    public void crawlProductsAndSave() {
+
+            crawlCurrentPage(productNameTag, brandTag, priceTag, imageTag, linkTag, ratingTag);
 
             // If the current page is a multiple of 10, move to the next group
             if (currentPage % 10 == 0) {
@@ -76,32 +105,39 @@ public class CrawlerService {
                 moveToNextPageWithinGroup(); // Click on the 'currentPage + 1' button to move to the next page within the group
                 waitForFiveSeconds();
             }
-        }
     }
 
 
-    private boolean isLastPageWithinGroup(){
-        WebElement currentPageElement = driver.findElement(By.xpath(currentPageTag));
-        int currentPageNumber = Integer.parseInt(currentPageElement.getText());
-        return currentPageNumber % 10 == 0;
+
+    public String getCategoryName(){
+        WebElement category = driver.findElement(By.xpath(categoryNameTag));
+        return category.getText();
     }
 
-
-    public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag, String imageTag){
+    public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag, String imageTag, String linkTag, String ratingTag){
 
         List<WebElement> productNames = driver.findElements(By.xpath(productNameTag));
         List<WebElement> brands = driver.findElements(By.xpath(brandTag));
         List<WebElement> prices = driver.findElements(By.xpath(priceTag));
         List<WebElement> images = driver.findElements(By.xpath(imageTag));
+        List<WebElement> links = driver.findElements(By.xpath(linkTag));
+        List<WebElement> ratings = driver.findElements(By.xpath(ratingTag));
 
-//        int minSize = Math.min(Math.min(productNames.size(), brands.size()), prices.size());
-
-        int minSize = Math.min(Math.min(Math.min(productNames.size(), brands.size()), prices.size()), images.size());
+        List<Integer> sizes = Arrays.asList(productNames.size(), brands.size(), prices.size(), images.size(), links.size(), ratings.size());
+        int minSize = Collections.min(sizes);
 
         List<String> imgSrcs = new ArrayList<>();
         for(WebElement image : images){
             imgSrcs.add(image.getAttribute("src"));
         }
+
+        List<String> linkHrefs = new ArrayList<>();
+        for(WebElement link : links){
+            linkHrefs.add(link.getAttribute("href"));
+        }
+
+        //rating 가지고 오기 위함(자식 요소의 텍스트를 제외하고 특정요소의 텍스트만 가지고 오기 위해서 JavaScriptExecutor 사용)
+        JavascriptExecutor js = (JavascriptExecutor) driver;
 
         for(int i=0; i< minSize; i++){
             RawData rawData = new RawData();
@@ -110,6 +146,19 @@ public class CrawlerService {
             rawData.setBrand(brands.get(i).getText());
             rawData.setPrice(prices.get(i).getText());
             rawData.setImage(imgSrcs.get(i));
+            rawData.setProductLink(linkHrefs.get(i));
+
+            rawData.setCategoryName(getCategoryName());
+
+            //rating
+            String ratingStr = (String) js.executeScript("return arguments[0].childNodes[arguments[0].childNodes.length-1].textContent.trim()", ratings.get(i));
+            Double rating = 0.0;
+            try {
+                rating = Double.parseDouble(ratingStr);
+            } catch (NumberFormatException | NullPointerException e) {
+                // Ignore, the default value is already set to 0
+            }
+            rawData.setRating(rating);
 
             save(rawData);
         }
@@ -117,26 +166,6 @@ public class CrawlerService {
     }
 
 
-    //다음 버튼이 있는지 확인하는 로직추가
-    public boolean isNextButtonExistWithinGroup(){
-
-        try {
-            String nextPageButtonXPath = "//div[@class='com_paginate notranslate']//a[contains(text(), '" + currentPage + "')]";
-            driver.findElement(By.xpath(nextPageButtonXPath));
-            return true;
-        } catch(NoSuchElementException e) {
-            return false;
-        }
-    }
-
-    public boolean isNextButtonExist() {
-        try {
-            driver.findElement(By.xpath(pagingTag + "//a[@class='btn_next on' and @title='다음']"));
-            return true;
-        } catch(NoSuchElementException e) {
-            return false;
-        }
-    }
 
 
     public void moveOnToNextGroup() {
@@ -160,9 +189,8 @@ public class CrawlerService {
             currentPage++;
 
         } catch (TimeoutException e){
-            System.out.println("No more page to navigate");
+            throw new NoMorePagesException("No more page to navigate");
         }
-
 
     }
 
@@ -189,9 +217,10 @@ public class CrawlerService {
             currentPage++;
 
         } catch (TimeoutException e){
-            System.out.println("No more page to navigate");
+            throw new NoMorePagesException("No more page to navigate");
         }
     }
+
 
     public void waitForFiveSeconds(){
         try {
@@ -200,7 +229,6 @@ public class CrawlerService {
             e.printStackTrace();
         }
     }
-
 
 
 
