@@ -9,6 +9,7 @@ import lombok.*;
 @Setter @Getter
 @AllArgsConstructor @Builder
 @NoArgsConstructor
+@ToString
 
 public class RawData {
     @Id
@@ -37,6 +38,7 @@ public class RawData {
     @Column(name="rating")
     private double rating;
 
-    @Column(name = "discount_rate")
+    @Column(name="discount_rate")
     private String discountRate;
+
 }
