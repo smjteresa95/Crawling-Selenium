@@ -26,8 +26,9 @@ public class CrawlerService {
     private final List<Crawler> crawlerList;
 
     @Autowired
-    public CrawlerService(List<Crawler> crawlerList){
+    public CrawlerService(List<Crawler> crawlerList, WebDriverService webDriver){
         this.crawlerList = crawlerList;
+        this.webDriver = webDriver;
     }
 
     @PostConstruct
