@@ -4,4 +4,5 @@ public interface Crawler {
 
     void crawlAllProductsByCategory();
 
+
 }

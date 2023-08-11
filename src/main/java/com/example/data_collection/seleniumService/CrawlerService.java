@@ -1,18 +1,10 @@
 package com.example.data_collection.seleniumService;
 
-import com.example.data_collection.domain.entity.RawData;
-import com.example.data_collection.domain.entity.RawDataRepository;
-import com.example.data_collection.exception.NoMorePagesException;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.AllArgsConstructor;
-import org.openqa.selenium.*;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.*;
 
 

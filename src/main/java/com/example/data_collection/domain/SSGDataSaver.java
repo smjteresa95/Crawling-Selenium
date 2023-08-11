@@ -1,17 +1,17 @@
 package com.example.data_collection.domain;
 
-import com.example.data_collection.domain.entity.RawData;
-import com.example.data_collection.domain.entity.RawDataRepository;
+import com.example.data_collection.domain.entity.SSGRawData;
+import com.example.data_collection.domain.entity.SSGRawDataRepository;
 import lombok.AllArgsConstructor;
 
 
 @AllArgsConstructor
-public class SSGDataSaver implements DataSaver<RawData> {
+public class SSGDataSaver implements DataSaver<SSGRawData> {
 
-    private final RawDataRepository rawDataRepository;
+    private final SSGRawDataRepository SSGRawDataRepository;
 
     @Override
-    public void save(RawData data) {
-        rawDataRepository.save(data);
+    public void save(SSGRawData data) {
+        SSGRawDataRepository.save(data);
     }
 }

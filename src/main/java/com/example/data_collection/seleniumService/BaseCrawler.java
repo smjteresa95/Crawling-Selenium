@@ -4,24 +4,19 @@ import com.example.data_collection.config.HtmlTagConfig;
 import com.example.data_collection.config.HtmlTagConfigFactory;
 import com.example.data_collection.domain.BaseRawData;
 import com.example.data_collection.domain.DataSaver;
-import com.example.data_collection.domain.entity.RawData;
 import com.example.data_collection.exception.NoMorePagesException;
-import lombok.Getter;
 import lombok.Setter;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.yaml.snakeyaml.events.Event;
-import org.yaml.snakeyaml.tokens.Token;
 
 import java.io.Serializable;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class AbstractCrawler<T extends BaseRawData, ID extends Serializable> implements Crawler {
+abstract class BaseCrawler<T extends BaseRawData, ID extends Serializable> implements Crawler {
 
     protected final HtmlTagConfigFactory htmlTagFactory;
     protected WebDriverService webDriverService;
@@ -38,7 +33,7 @@ abstract class AbstractCrawler<T extends BaseRawData, ID extends Serializable> i
     protected DataSaver<T> dataSaver;
 
 
-    AbstractCrawler(HtmlTagConfigFactory htmlTag, WebDriverService webDriverService, String siteName, int currentPage) throws IllegalAccessException {
+    BaseCrawler(HtmlTagConfigFactory htmlTag, WebDriverService webDriverService, String siteName, int currentPage) throws IllegalAccessException {
 
         this.siteName = siteName;
         this.currentPage = currentPage;
@@ -104,18 +99,20 @@ abstract class AbstractCrawler<T extends BaseRawData, ID extends Serializable> i
         }
     }
 
-
     public void goToNextGroup() {
         String nextGroupButtonXPath = tag.getNextGroupButtonXPath();
         moveToNextPageOrGroup(nextGroupButtonXPath);
 
     }
 
-
     public void goToNextPageWithinGroup(){
         String nextPageButtonXPath = tag.getNextPageButtonXPath();
         moveToNextPageOrGroup(nextPageButtonXPath);
     }
+
+    protected abstract double getDiscountRate(int index, List<WebElement> discountRates);
+
+    protected abstract double getRating(int index, List<WebElement> ratings, JavascriptExecutor js);
 
 
     public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag, String discountRateTag, String imageTag, String linkTag, String ratingTag, String imageAttr, String linkAttr){
@@ -154,28 +151,14 @@ abstract class AbstractCrawler<T extends BaseRawData, ID extends Serializable> i
             rawData.setImage(i < imgSrcs.size() ? imgSrcs.get(i) : "");
             rawData.setProductLink(i < linkHrefs.size() ? linkHrefs.get(i) : "");
 
-            // discount rate 처리
-            if(i < discountRates.size() && discountRates.get(i) != null) {
-                rawData.setDiscountRate(discountRates.get(i).getText());
-            } else {
-                rawData.setDiscountRate("0%");
-            }
+            //discount rate 처리 후 저장
+            rawData.setDiscountRate(i < ratings.size() ? getDiscountRate(i, discountRates) : 0);
+
+            //rating 처리 후 저장
+            rawData.setRating(i < ratings.size() ? getRating(i, ratings, js) : 0);
 
             rawData.setCategoryName(getCategoryName());
 
-            //rating 처리
-            if(i < ratings.size() && ratings.get(i) != null) {
-                String ratingStr = (String) js.executeScript("return arguments[0].childNodes[arguments[0].childNodes.length-1].textContent.trim()", ratings.get(i));
-                Double rating = 0.0;
-                try {
-                    rating = Double.parseDouble(ratingStr);
-                } catch (NumberFormatException | NullPointerException e) {
-                    // ignore, since the default value is already set to 0.0
-                }
-                rawData.setRating(rating);
-            } else {
-                rawData.setRating(0.0);
-            }
 
             rawDataRepository.save(rawData);
             System.out.println(rawData.toString());

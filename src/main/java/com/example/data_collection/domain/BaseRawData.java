@@ -32,13 +32,13 @@ public class BaseRawData {
     @Column(name = "image")
     private String image;
 
-    @Column(name="product_link")
+    @Column(name="product_link", length = 10000)
     private String productLink;
 
     @Column(name="rating")
     private double rating;
 
     @Column(name="discount_rate")
-    private String discountRate;
+    private double discountRate;
 
 }
