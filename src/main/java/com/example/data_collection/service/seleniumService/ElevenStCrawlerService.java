@@ -1,24 +1,25 @@
-package com.example.data_collection.seleniumService;
+package com.example.data_collection.service.seleniumService;
 
 import com.example.data_collection.config.HtmlTagConfigFactory;
 import com.example.data_collection.domain.entity.ElevenStRawData;
 import com.example.data_collection.domain.entity.ElevenStRawDataRepository;
 import com.example.data_collection.exception.NoMorePagesException;
+import com.example.data_collection.service.WebDriverService;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+//지정해준 카테고리 내의 모든 상품 정보 크롤링해서 DB에 저장
+
 @Service
-@Order(1)
+@Order(2)
 public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
 
     private String mealKitcode = "1129418";
@@ -35,17 +36,17 @@ public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
     }
 
     @Override
-    protected ElevenStRawData createRawDataInstance() {
+    ElevenStRawData createRawDataInstance() {
         return new ElevenStRawData();
     }
 
     @Override
-    protected ElevenStRawDataRepository getRawDataRepository() {
+    ElevenStRawDataRepository getRawDataRepository() {
         return elevenStRawDataRepository;
     }
 
     @Override
-    protected double getDiscountRate(int index, List<WebElement> discountRates) {
+    double getDiscountRate(int index, List<WebElement> discountRates) {
         if(index < discountRates.size() && discountRates.get(index) != null) {
             String discountText = discountRates.get(index).getText();
             discountText = discountText.replace("최저가", "").replace("%", "").trim();
@@ -57,7 +58,7 @@ public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
     }
 
     @Override
-    protected double getRating(int index, List<WebElement> ratings, JavascriptExecutor js) {
+    double getRating(int index, List<WebElement> ratings, JavascriptExecutor js) {
 
         Pattern pattern = Pattern.compile("([0-9]*[0-9])?[0-9]+");
         Matcher matcher = pattern.matcher(ratings.get(index).getText());
@@ -76,7 +77,7 @@ public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
     }
 
     @Override
-    public void crawlAllProductsByCategory() {
+    public void startCrawlingAllProducts() {
 
         List<String> categoryCodes = Arrays.asList(mealKitcode);
 

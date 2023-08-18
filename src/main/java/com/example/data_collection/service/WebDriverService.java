@@ -1,4 +1,4 @@
-package com.example.data_collection.seleniumService;
+package com.example.data_collection.service;
 
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
@@ -12,13 +12,13 @@ import java.time.Duration;
 @Service
 @Getter
 public class WebDriverService {
-    private WebDriver driver;
-    private WebDriverWait wait;
+    WebDriver driver;
+    WebDriverWait wait;
 
     @Autowired
     public WebDriverService(WebDriver driver, WebDriverWait wait){
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
     }
 
     @PreDestroy

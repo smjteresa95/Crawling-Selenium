@@ -38,13 +38,18 @@ public class HtmlTagConfigFactory {
 
                         .imageAttribute("src")
                         .linkAttribute("href")
+
+                        .siteHome("https://shinsegaemall.ssg.com/")
+                        .searchTag("//*[@id=\"ssg-query\"]")
+                        .searchButtonTag("//*[@id=\"ssg-query-btn\"]/i")
                         .build();
 
             case "eleven":
                 return HtmlTagConfig.builder()
                         .siteUrl("https://www.11st.co.kr/category/DisplayCategory.tmall?method=getDisplayCategory2Depth&dispCtgrNo=")
 
-                        .productNameTag("//*/li[contains(@id, 'thisClick_')]/div/div[2]/p/a")
+//                        .productNameTag("//*/li[contains(@id, 'thisClick_')]/div/div[2]/p/a")
+                        .productNameTag("//*[@id=\"layBodyWrap\"]/div/div/div[3]/div/section[4]/ul/li[4]/div/div[2]/div[1]/div[1]/a/strong")
                         .brandTag("//*/li[contains(@id, 'thisClick_')]/div/div[4]/p[1]/a")
                         .priceTag("//*/li[contains(@id, 'thisClick_')]/div/div[3]/div[1]/span[1]/strong")
                         .imageTag("//*/li[contains(@id, 'thisClick_')]/div/div[1]/a/img")
@@ -59,6 +64,10 @@ public class HtmlTagConfigFactory {
 
                         .imageAttribute("src")
                         .linkAttribute("href")
+
+                        .siteHome("https://www.11st.co.kr/")
+                        .searchTag("//*[@id=\"tSearch\"]/form/fieldset/input")
+                        .searchButtonTag("//*[@id=\"tSearch\"]/form/fieldset/button")
 
                         .build();
 

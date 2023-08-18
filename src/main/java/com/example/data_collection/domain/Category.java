@@ -1,4 +1,4 @@
-package com.example.data_collection.domain.entity;
+package com.example.data_collection.domain;
 
 import jakarta.persistence.*;
 import lombok.*;

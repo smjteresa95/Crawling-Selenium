@@ -1,10 +1,11 @@
-package com.example.data_collection.seleniumService;
+package com.example.data_collection.service.seleniumService;
 
 import com.example.data_collection.config.HtmlTagConfig;
 import com.example.data_collection.config.HtmlTagConfigFactory;
-import com.example.data_collection.domain.BaseRawData;
-import com.example.data_collection.domain.DataSaver;
+import com.example.data_collection.domain.entity.BaseRawData;
+import com.example.data_collection.domain.entity.datasaver.DataSaver;
 import com.example.data_collection.exception.NoMorePagesException;
+import com.example.data_collection.service.WebDriverService;
 import lombok.Setter;
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -18,19 +19,19 @@ import java.util.List;
 
 abstract class BaseCrawler<T extends BaseRawData, ID extends Serializable> implements Crawler {
 
-    protected final HtmlTagConfigFactory htmlTagFactory;
-    protected WebDriverService webDriverService;
-    protected final WebDriver driver;
-    protected WebDriverWait wait;
-    protected HtmlTagConfig tag;
+    HtmlTagConfigFactory htmlTagFactory;
+    WebDriverService webDriverService;
+    WebDriver driver;
+    WebDriverWait wait;
+    HtmlTagConfig tag;
 
-    protected String siteName;
-    protected int currentPage;
+    String siteName;
+    int currentPage;
 
     private int totalPagePerGroup = 10;
 
     @Setter
-    protected DataSaver<T> dataSaver;
+    DataSaver<T> dataSaver;
 
 
     BaseCrawler(HtmlTagConfigFactory htmlTag, WebDriverService webDriverService, String siteName, int currentPage) throws IllegalAccessException {
@@ -47,9 +48,9 @@ abstract class BaseCrawler<T extends BaseRawData, ID extends Serializable> imple
     }
 
 
-    protected abstract T createRawDataInstance();
+    abstract T createRawDataInstance();
 
-    protected abstract JpaRepository<T, ID> getRawDataRepository();
+    abstract JpaRepository<T, ID> getRawDataRepository();
 
 
     public void reloadHtmlConfig(){
@@ -110,12 +111,24 @@ abstract class BaseCrawler<T extends BaseRawData, ID extends Serializable> imple
         moveToNextPageOrGroup(nextPageButtonXPath);
     }
 
-    protected abstract double getDiscountRate(int index, List<WebElement> discountRates);
+    abstract double getDiscountRate(int index, List<WebElement> discountRates);
 
-    protected abstract double getRating(int index, List<WebElement> ratings, JavascriptExecutor js);
+    abstract double getRating(int index, List<WebElement> ratings, JavascriptExecutor js);
 
+    public int getPrice(int index, List<WebElement> prices){
+        if(index < prices.size() && prices.get(index) != null) {
+            String priceStr = prices.get(index).getText().replace(",", "");
+            return Integer.parseInt(priceStr);
 
-    public void crawlCurrentPage(String productNameTag, String brandTag, String priceTag, String discountRateTag, String imageTag, String linkTag, String ratingTag, String imageAttr, String linkAttr){
+        } else {
+            return 0;
+        }
+    }
+
+    public void crawlCurrentPage(
+            String productNameTag, String brandTag, String priceTag,
+            String discountRateTag, String imageTag, String linkTag,
+            String ratingTag, String imageAttr, String linkAttr){
 
         JpaRepository<T, ID> rawDataRepository = getRawDataRepository();
 
@@ -147,9 +160,11 @@ abstract class BaseCrawler<T extends BaseRawData, ID extends Serializable> imple
 
             rawData.setProductName(i < productNames.size() ? productNames.get(i).getText() : "");
             rawData.setBrand(i < brands.size() ? brands.get(i).getText() : "");
-            rawData.setPrice(i < prices.size() ? prices.get(i).getText() : "");
             rawData.setImage(i < imgSrcs.size() ? imgSrcs.get(i) : "");
             rawData.setProductLink(i < linkHrefs.size() ? linkHrefs.get(i) : "");
+
+            // price 처리 후 저장
+            rawData.setPrice(i < prices.size() ? getPrice(i, prices) : 0);
 
             //discount rate 처리 후 저장
             rawData.setDiscountRate(i < ratings.size() ? getDiscountRate(i, discountRates) : 0);
@@ -158,7 +173,6 @@ abstract class BaseCrawler<T extends BaseRawData, ID extends Serializable> imple
             rawData.setRating(i < ratings.size() ? getRating(i, ratings, js) : 0);
 
             rawData.setCategoryName(getCategoryName());
-
 
             rawDataRepository.save(rawData);
             System.out.println(rawData.toString());

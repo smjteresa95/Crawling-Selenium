@@ -18,7 +18,6 @@ public class WebDriverConfig {
         return new ChromeDriver(getOptions());
     }
 
-
     @Bean
     public WebDriverWait webDriverWait(WebDriver driver){
         return new WebDriverWait(driver, Duration.ofSeconds(60));

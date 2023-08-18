@@ -15,9 +15,9 @@ public class XPathTest {
 
     private WebDriver driver;
 
-    String siteUrl = "https://www.11st.co.kr/category/DisplayCategory.tmall?method=getDisplayCategory2Depth&dispCtgrNo=1129418";
+    String siteUrl = "https://www.wingeat.com/side-nav?pathname=/saving";
 
-    String xPath = "//*/li[contains(@id, 'thisClick_')]/div/div[2]/p/a";
+    String xPath = "//*[@id=\"app-template\"]/div[1]/div/div[3]/ul/li[2]/div/div[1]/span";
 
     @BeforeEach
     public void setUp(){
@@ -25,31 +25,29 @@ public class XPathTest {
         driver = new ChromeDriver();
     }
 
-    @Test
-    public void testVaildAttriXPath(){
-        driver.get(siteUrl);
-        WebElement attriElement = null;
-        try{
-            attriElement = driver.findElement(By.xpath(xPath));
-
-        } catch (Exception e){
-
-        }
-
-        assertNotNull(attriElement, "Element not found with the provided XPath");
-//        String text = element.getText();
-//        System.out.println("Extracted text: " + text);
-
-        String attri = attriElement.getAttribute("href");
-        System.out.println("Extracted attribute: " + attri);
-    }
+//    @Test
+//    public void testVaildAttriXPath(){
+//        driver.get(siteUrl);
+//        WebElement attriElement = null;
+//        try{
+//            attriElement = driver.findElement(By.xpath(xPath));
+//
+//        } catch (Exception e){
+//
+//        }
+//
+//        assertNotNull(attriElement, "Element not found with the provided XPath");
+//
+//        String attri = attriElement.getAttribute("href");
+//        System.out.println("Extracted attribute: " + attri);
+//    }
 
     @Test
     public void testValidTextXPath(){
         driver.get(siteUrl);
         WebElement textElement = null;
         try{
-            textElement = driver.findElement(By.xpath());
+            textElement = driver.findElement(By.xpath(xPath));
         } catch(Exception e){
 
         }

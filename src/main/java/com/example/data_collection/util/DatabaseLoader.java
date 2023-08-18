@@ -1,8 +1,7 @@
 package com.example.data_collection.util;
 
-import com.example.data_collection.domain.entity.Category;
-import com.example.data_collection.domain.entity.CategoryRepository;
-import jakarta.transaction.Transactional;
+import com.example.data_collection.domain.Category;
+import com.example.data_collection.domain.CategoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.example.data_collection.domain;
+package com.example.data_collection.domain.entity.datasaver;
 
 import com.example.data_collection.domain.entity.ElevenStRawData;
 import com.example.data_collection.domain.entity.ElevenStRawDataRepository;

@@ -1,9 +1,10 @@
-package com.example.data_collection.seleniumService;
+package com.example.data_collection.service.seleniumService;
 
 import com.example.data_collection.config.HtmlTagConfigFactory;
 import com.example.data_collection.domain.entity.SSGRawData;
 import com.example.data_collection.domain.entity.SSGRawDataRepository;
 import com.example.data_collection.exception.NoMorePagesException;
+import com.example.data_collection.service.WebDriverService;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,12 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
+//지정해준 카테고리 내의 모든 상품 정보 크롤링해서 DB에 저장
 @Service
-@Order(2)
-public class SSGCrawlerService extends BaseCrawler<SSGRawData, Long> {
+@Order(1)
+public class SsgCrawlerService extends BaseCrawler<SSGRawData, Long> {
 
     //밀키트
     private String mealKitCode = "6000139913";
@@ -35,24 +36,24 @@ public class SSGCrawlerService extends BaseCrawler<SSGRawData, Long> {
 
 
     @Autowired
-    public SSGCrawlerService(SSGRawDataRepository SSGRawDataRepository, HtmlTagConfigFactory htmlTag, WebDriverService webDriverService) throws IllegalAccessException {
+    public SsgCrawlerService(SSGRawDataRepository SSGRawDataRepository, HtmlTagConfigFactory htmlTag, WebDriverService webDriverService) throws IllegalAccessException {
         super(htmlTag, webDriverService, SITE_NAME, CURRENT_PAGE);
         this.SSGRawDataRepository = SSGRawDataRepository;
     }
 
 
     @Override
-    protected SSGRawData createRawDataInstance() {
+    SSGRawData createRawDataInstance() {
         return new SSGRawData();
     }
 
     @Override
-    protected SSGRawDataRepository getRawDataRepository(){
+    SSGRawDataRepository getRawDataRepository(){
         return SSGRawDataRepository;
     }
 
     @Override
-    protected double getDiscountRate(int index, List<WebElement> discountRates) {
+    double getDiscountRate(int index, List<WebElement> discountRates) {
         if(index < discountRates.size() && discountRates.get(index) != null) {
             String discountText = discountRates.get(index).getText().replace("%", "").trim();
             try{
@@ -66,7 +67,7 @@ public class SSGCrawlerService extends BaseCrawler<SSGRawData, Long> {
     }
 
     @Override
-    protected double getRating(int index, List<WebElement> ratings, JavascriptExecutor js) {
+    double getRating(int index, List<WebElement> ratings, JavascriptExecutor js) {
         if(index < ratings.size() && ratings.get(index) != null) {
             String ratingStr = (String) js.executeScript("return arguments[0].childNodes[arguments[0].childNodes.length-1].textContent.trim()", ratings.get(index));
             Double rating = 0.0;
@@ -82,7 +83,7 @@ public class SSGCrawlerService extends BaseCrawler<SSGRawData, Long> {
     }
 
     @Override
-    public void crawlAllProductsByCategory(){
+    public void startCrawlingAllProducts(){
 
         List<String> categoryCodes = Arrays.asList(mealKitCode);
 
@@ -101,8 +102,6 @@ public class SSGCrawlerService extends BaseCrawler<SSGRawData, Long> {
             }
         }
     }
-
-
 
 
 }

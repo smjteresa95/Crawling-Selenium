@@ -1,4 +1,4 @@
-package com.example.data_collection.domain;
+package com.example.data_collection.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +27,7 @@ public class BaseRawData {
     private String brand;
 
     @Column(name = "price")
-    private String price;
+    private int price;
 
     @Column(name = "image")
     private String image;
