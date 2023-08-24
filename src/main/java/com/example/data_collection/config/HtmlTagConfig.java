@@ -9,6 +9,8 @@ public class HtmlTagConfig {
 
     private String siteUrl;
 
+    private String productCard;
+
     //데이터 찾기 위한 태그
     private String productNameTag;
     private String brandTag;
@@ -25,10 +27,6 @@ public class HtmlTagConfig {
     private String imageAttribute;
     private String linkAttribute;
 
-    //검색을 위한 태그
-    private String siteHome;
-    private String searchTag;
-    private String searchButtonTag;
 
 }
 

@@ -9,7 +9,7 @@ import lombok.*;
 @Getter
 @AllArgsConstructor @Builder
 @NoArgsConstructor @ToString
-public class ApiData {
+public class PublicData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

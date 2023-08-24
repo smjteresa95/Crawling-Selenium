@@ -1,9 +1,7 @@
 package com.example.data_collection.service.seleniumsearchservice;
 
 import com.example.data_collection.config.SearchHtmlTagConfigFactory;
-import com.example.data_collection.domain.ApiDataRepository;
-import com.example.data_collection.domain.entity.SSGRawData;
-import com.example.data_collection.domain.entity.SSGRawDataRepository;
+import com.example.data_collection.domain.PublicDataRepository;
 import com.example.data_collection.domain.searchentity.SearchSsgRawData;
 import com.example.data_collection.domain.searchentity.SearchSsgRawDataRepository;
 import com.example.data_collection.service.WebDriverService;
@@ -22,7 +20,7 @@ public class SsgSearchCrawlerService extends BaseSearchCrawler<SearchSsgRawData,
 
     private final SearchSsgRawDataRepository searchSsgRawDataRepository;
 
-    private final ApiDataRepository apiDataRepository;
+    private final PublicDataRepository publicDataRepository;
 
 
     private static final String SITE_NAME = "ssg";
@@ -31,10 +29,10 @@ public class SsgSearchCrawlerService extends BaseSearchCrawler<SearchSsgRawData,
     public SsgSearchCrawlerService(SearchSsgRawDataRepository searchSsgRawDataRepository,
                                    SearchHtmlTagConfigFactory htmlTag,
                                    WebDriverService webDriverService,
-                                   ApiDataRepository apiDataRepository) throws IllegalAccessException {
+                                   PublicDataRepository publicDataRepository) throws IllegalAccessException {
         super(htmlTag, webDriverService, SITE_NAME);
         this.searchSsgRawDataRepository = searchSsgRawDataRepository;
-        this.apiDataRepository = apiDataRepository;
+        this.publicDataRepository = publicDataRepository;
     }
 
     @Override
@@ -68,7 +66,7 @@ public class SsgSearchCrawlerService extends BaseSearchCrawler<SearchSsgRawData,
     @Override
     public void searchThenCrawlProductInfo() {
         //get product name to search, put them into the list.
-        List<String> apiProductNameList = apiDataRepository.findAllProductNames();
+        List<String> apiProductNameList = publicDataRepository.findAllProductNames();
 
         driver.get(tag.getSiteHome());
 

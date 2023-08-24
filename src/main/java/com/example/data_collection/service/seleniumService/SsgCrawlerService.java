@@ -16,7 +16,7 @@ import java.util.List;
 
 //지정해준 카테고리 내의 모든 상품 정보 크롤링해서 DB에 저장
 @Service
-@Order(1)
+@Order(2)
 public class SsgCrawlerService extends BaseCrawler<SSGRawData, Long> {
 
     //밀키트
@@ -52,19 +52,19 @@ public class SsgCrawlerService extends BaseCrawler<SSGRawData, Long> {
         return SSGRawDataRepository;
     }
 
-    @Override
-    double getDiscountRate(int index, List<WebElement> discountRates) {
-        if(index < discountRates.size() && discountRates.get(index) != null) {
-            String discountText = discountRates.get(index).getText().replace("%", "").trim();
-            try{
-                return Double.parseDouble(discountText);
-            }catch(NumberFormatException e){
-                return 0.0;
-            }
-        } else {
-            return 0.0;
-        }
-    }
+//    @Override
+//    double getDiscountRate(int index, List<WebElement> discountRates) {
+//        if(index < discountRates.size() && discountRates.get(index) != null) {
+//            String discountText = discountRates.get(index).getText().replace("%", "").trim();
+//            try{
+//                return Double.parseDouble(discountText);
+//            }catch(NumberFormatException e){
+//                return 0.0;
+//            }
+//        } else {
+//            return 0.0;
+//        }
+//    }
 
     @Override
     double getRating(int index, List<WebElement> ratings, JavascriptExecutor js) {
@@ -80,6 +80,11 @@ public class SsgCrawlerService extends BaseCrawler<SSGRawData, Long> {
         } else {
             return 0.0;
         }
+    }
+
+    @Override
+    String getBrand(int index, List<WebElement> brands) {
+        return null;
     }
 
     @Override

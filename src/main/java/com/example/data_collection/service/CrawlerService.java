@@ -25,7 +25,7 @@ public class CrawlerService {
         this.webDriver = webDriver;
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void crawlProductBySite(){
 
         for(Crawler crawler : crawlerList){
@@ -33,6 +33,9 @@ public class CrawlerService {
         }
     }
 
+
+
+    //Selenium 으로 검색해서 나온 값 DB에 저장하게 끔 하는 메서서드들 실행.
 //    private final List<SearchCrawler> crawlerList;
 //
 //    @Autowired

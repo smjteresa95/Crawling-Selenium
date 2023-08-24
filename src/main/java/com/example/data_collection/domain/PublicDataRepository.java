@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ApiDataRepository extends JpaRepository<ApiData, Long> {
+public interface PublicDataRepository extends JpaRepository<PublicData, Long> {
 
-    @Query("SELECT a.productName FROM ApiData a")
+    @Query("SELECT a.productName FROM PublicData a")
     List<String> findAllProductNames();
 }

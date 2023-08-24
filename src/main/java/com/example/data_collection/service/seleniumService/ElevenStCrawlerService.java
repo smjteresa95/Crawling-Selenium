@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 //지정해준 카테고리 내의 모든 상품 정보 크롤링해서 DB에 저장
 
 @Service
-@Order(2)
+@Order(3)
 public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
 
     private String mealKitcode = "1129418";
@@ -45,17 +45,17 @@ public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
         return elevenStRawDataRepository;
     }
 
-    @Override
-    double getDiscountRate(int index, List<WebElement> discountRates) {
-        if(index < discountRates.size() && discountRates.get(index) != null) {
-            String discountText = discountRates.get(index).getText();
-            discountText = discountText.replace("최저가", "").replace("%", "").trim();
-            return Double.parseDouble(discountText);
-
-        } else {
-            return 0.0;
-        }
-    }
+//    @Override
+//    double getDiscountRate(int index, List<WebElement> discountRates) {
+//        if(index < discountRates.size() && discountRates.get(index) != null) {
+//            String discountText = discountRates.get(index).getText();
+//            discountText = discountText.replace("최저가", "").replace("%", "").trim();
+//            return Double.parseDouble(discountText);
+//
+//        } else {
+//            return 0.0;
+//        }
+//    }
 
     @Override
     double getRating(int index, List<WebElement> ratings, JavascriptExecutor js) {
@@ -74,6 +74,11 @@ public class ElevenStCrawlerService extends BaseCrawler<ElevenStRawData, Long> {
             return value;
         }
         return 0.0;
+    }
+
+    @Override
+    String getBrand(int index, List<WebElement> brands) {
+        return null;
     }
 
     @Override

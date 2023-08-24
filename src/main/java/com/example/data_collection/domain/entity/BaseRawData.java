@@ -35,10 +35,12 @@ public class BaseRawData {
     @Column(name="product_link", length = 10000)
     private String productLink;
 
-    @Column(name="rating")
-    private double rating;
+    // rating의 경우 값을 가지고 올 수 없는 사이트가 있다.
+    // 참조 데이터 타입을 써야 null을 넣는게 가능하다.
+    @Column(name="rating", nullable = true)
+    private Double rating;
 
-    @Column(name="discount_rate")
-    private double discountRate;
+//    @Column(name="discount_rate")
+//    private double discountRate;
 
 }

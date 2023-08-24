@@ -1,8 +1,7 @@
 package com.example.data_collection.service.seleniumsearchservice;
 
 import com.example.data_collection.config.SearchHtmlTagConfigFactory;
-import com.example.data_collection.domain.ApiDataRepository;
-import com.example.data_collection.domain.entity.ElevenStRawData;
+import com.example.data_collection.domain.PublicDataRepository;
 import com.example.data_collection.domain.searchentity.SearchElevenStRawData;
 import com.example.data_collection.domain.searchentity.SearchElevenStRawDataRepository;
 import com.example.data_collection.service.WebDriverService;
@@ -12,7 +11,6 @@ import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,7 +23,7 @@ public class ElevenStSearchCrawlerService extends BaseSearchCrawler<SearchEleven
 
     private final SearchElevenStRawDataRepository searchElevenStRawDataRepository;
 
-    private final ApiDataRepository apiDataRepository;
+    private final PublicDataRepository publicDataRepository;
 
     private static final String SITE_NAME = "eleven";
 
@@ -33,10 +31,10 @@ public class ElevenStSearchCrawlerService extends BaseSearchCrawler<SearchEleven
     ElevenStSearchCrawlerService(SearchHtmlTagConfigFactory htmlTag,
                                  SearchElevenStRawDataRepository searchElevenStRawDataRepository,
                                  WebDriverService webDriverService,
-                                 ApiDataRepository apiDataRepository) throws IllegalAccessException {
+                                 PublicDataRepository publicDataRepository) throws IllegalAccessException {
         super(htmlTag, webDriverService, SITE_NAME);
         this.searchElevenStRawDataRepository = searchElevenStRawDataRepository;
-        this.apiDataRepository = apiDataRepository;
+        this.publicDataRepository = publicDataRepository;
     }
 
     @Override
@@ -86,7 +84,7 @@ public class ElevenStSearchCrawlerService extends BaseSearchCrawler<SearchEleven
     @Override
     public void searchThenCrawlProductInfo() {
         //get product name to search, put them into the list.
-        List<String> apiProductNameList = apiDataRepository.findAllProductNames();
+        List<String> apiProductNameList = publicDataRepository.findAllProductNames();
 
         driver.get(tag.getSiteHome());
 

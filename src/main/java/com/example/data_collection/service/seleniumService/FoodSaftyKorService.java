@@ -14,7 +14,7 @@ import java.time.Duration;
 import java.util.List;
 
 @Service
-@Order(3)
+@Order(5)
 public class FoodSaftyKorService implements Crawler{
 
     WebDriver driver;
