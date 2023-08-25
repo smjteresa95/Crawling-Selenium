@@ -85,7 +85,7 @@ public class HtmlTagConfigFactory {
                         .categoryNameTag("//*[@id='container']/h3[contains(@class, 'css-i804ml')]")
 
                         .nextPageButtonXPath(getKurlyNextPageButtonXpathForCurrentPage(currentPage))
-                        .nextGroupButtonXPath( "//*[@id=\"container\"]/div[2]/div[2]/div[3]/a[13]/img[contains(@alt,'다음 페이지')]")
+                        .nextGroupButtonXPath("//*[@id=\"container\"]/div[2]/div[2]/div[3]/a[13]/img[contains(@alt,'다음 페이지')]")
 
                         .imageAttribute("src")
                         .linkAttribute("href")

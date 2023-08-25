@@ -1,6 +1,6 @@
-package com.example.data_collection.service.seleniumService;
+package com.example.data_collection.service.FinalSeleniumService;
 
-import com.example.data_collection.config.HtmlTagConfig;
+import com.example.data_collection.exception.NoMorePagesException;
 import com.example.data_collection.service.WebDriverService;
 import jakarta.annotation.PostConstruct;
 import org.openqa.selenium.*;
@@ -13,9 +13,19 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-public class TestCrawlingService {
+public class OasisService {
 
-    String siteUrl = "https://www.oasis.co.kr/product/list?categoryId=246";
+    int currentPage;
+
+    String siteUrl = "https://www.oasis.co.kr/product/list?categoryId=";
+
+    String freshCode = "520";
+
+    String sideDishCode = "123";
+
+    String saladCode = "50";
+
+
     String linkTag = "//*[@id=\"sec_product_list\"]/div[4]/div[2]/div/ul/li[contains(@class, 'swiper-slide pId')]/div/div[2]/div[1]/div[3]/div[1]/span/a[@class='listTit']";
 
     //1. 디테일 페이지에서의 상품 정보 가지고 오는 태그
@@ -43,14 +53,18 @@ public class TestCrawlingService {
     //상세 정보 탭
     String detailTabTag = "//*[@id=\"pViewTab\"]/ul/li[2]/a[@class='tabBtn btn03']";
 
-    //기준으로 잡을 상품명
-    String itemNameTag = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[1]/table/tbody/tr[2]/td/table/tbody/tr[2]/td[3]";
-
-    //용량/수량
-    String servQtyTag = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[1]/table/tbody/tr[2]/td/table/tbody/tr[6]/td[3]";
-
     //영양성분 이미지
     String nutritionFactImgTag = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[@class='conts_productInfo_notice img']/div/img";
+
+
+    //3. next button tag
+//    String nextButtonTag = String.format("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@href = 'javascript:page(%d);']", currentPage+1);
+    public String getNextPageButtonXpath(int currentPage){
+        return String.format("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@href = 'javascript:page(%d);']", currentPage+1);
+    }
+
+    String nextGroupTag = "//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@class='pgBtn_next']";
+
 
     WebDriverService webDriverService;
 
@@ -59,22 +73,61 @@ public class TestCrawlingService {
     WebDriverWait wait;
 
     @Autowired
-    public TestCrawlingService(WebDriverService webDriverService){
+    public OasisService(WebDriverService webDriverService){
         this.webDriverService = webDriverService;
         driver = webDriverService.getDriver();
         wait = webDriverService.getWait();
     }
 
-    @PostConstruct
+//    @PostConstruct
     public void startCrawling(){
-        crawlDetailPage();
+        List<String> categoryCodes = Arrays.asList(sideDishCode, saladCode);
+
+        for(String code : categoryCodes) {
+            driver.get(siteUrl + code);
+
+            currentPage = 1;
+
+            while(true){
+                try {
+                    crawlAllProducts();
+                } catch (NoMorePagesException e){
+                    System.out.println("넘어갈 페이지가 없습니다.");
+                    break;
+                }
+            }
+        }
+    }
+
+
+    public void crawlAllProducts() {
+
+        try {
+
+            try {
+                crawlDetailPage();
+            } catch (Exception e) {
+                throw new NoMorePagesException("Unexpected error: " + e.getMessage());
+            }
+
+            // If the current page is a multiple of 10, move to the next group
+            if (currentPage % 10 == 0) {
+                moveToNextPageOrGroup(nextGroupTag); // Click on the 'next' button to move to the next group
+            }
+            // For all other pages, move to the next page within the group
+            else {
+                moveToNextPageOrGroup(getNextPageButtonXpath(currentPage)); // Click on the 'currentPage + 1' button to move to the next page within the group
+            }
+
+        } catch (Exception e){
+            throw new NoMorePagesException("Unexpected error: " + e.getMessage());
+        }
+
     }
 
 
     //제품 디테일 페이지로 이동
     public void crawlDetailPage(){
-
-        driver.get(siteUrl);
 
         //상세페이지 link들을 가지고 와서 리스트에 저장.
         List<WebElement> links = driver.findElements(By.xpath(linkTag));
@@ -148,13 +201,11 @@ public class TestCrawlingService {
                 //다행히 테이블에 있는 데이터는 전부 Xpath로 가지고 올 수 있다.
                 try {
                     title = row.findElement(By.xpath(titleCellPath)).getText();
-//                    System.out.println(title);
 
                     //찾고자 하는 항목이 존재 하면 값도 가지고 오기
                     if(titles.contains(title)) {
 
                     value = row.findElement(By.xpath(valuePath)).getText();
-//                    System.out.println(value);
 
                     results.put(title, value);
                     }
@@ -233,5 +284,22 @@ public class TestCrawlingService {
             return null;
         }
     }
+
+    //페이지 넘어가는 부분
+
+    //파라미터에 따라서, 다음페이지로 넘어갈 수도, 다음 그룹으로 넘어갈 수도 있다.
+    public void moveToNextPageOrGroup(String nextButtonXPath){
+        try {
+            WebElement pageButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextButtonXPath)));
+            pageButton.click();
+
+            currentPage++;
+        } catch (TimeoutException e){
+            throw new NoMorePagesException("No more page to navigate");
+        }
+    }
+
+
+
 
 }

@@ -4,37 +4,36 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.interactions.Actions;
 
 public class XPathTest {
 
     private WebDriver driver;
 
 //    String siteUrl = "https://www.kurly.com/categories/912001";
-    String siteUrl = "https://www.oasis.co.kr/product/detail/77645-1088094?categoryId=246";
-
-    String textXPath = "//*[@id=\"sec_product_view\"]/div[2]/div/div[2]/div[@class=\"infoBadges\"]/h1";
-
-    String attrXPath = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[2]/div[@class='conts_productInfo_notice img']/img";
-    String discountXPath = "//*[@id=\"container\"]/div[2]/div[2]/div[3]/a[13]/img[contains(@alt,'다음 페이지')]";
+    String siteUrl = "https://www.ssg.com/disp/category.ssg?ctgId=6000093748";
 
 
     @BeforeEach
     public void setUp(){
         System.setProperty("webdriver.chrome.driver",
-                "C:\\Users\\msong\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
+                "C:\\Users\\msong\\Desktop\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
         driver = new ChromeDriver();
         driver.get(siteUrl);
     }
 
     @Test
-    @DisplayName("상품 이미지/링크 잘 가지고 오는지 테스트")
-    public void testValidAttrXPath(){
+    public void iframeTest(){
+
         WebElement attrElement;
+
+        String attrXPath = "//*[@id=\"wrap_ifr\"]/div/div[3]/div/div/div[2]/img[contains(@alt, '품질표시이미지')]";
+
+        //iframe name이나 id 쓰면 된다.
+        driver.switchTo().frame("_ifr_html");
+
         try{
             attrElement = driver.findElement(By.xpath(attrXPath));
 
@@ -44,21 +43,70 @@ public class XPathTest {
 
         String attr = attrElement.getAttribute("src");
         System.out.println("Extracted attribute: " + attr);
+
+
+    }
+    @Test
+    @DisplayName("상품 이미지/링크 잘 가지고 오는지 테스트")
+    public void testValidAttrXPath(){
+
+        String attrXPath = "//*[@id=\"ty_thmb_view\"]/ul/li[2]/div[1]/div[2]/a[@class='clickable']";
+
+        WebElement attrElement;
+        try{
+            attrElement = driver.findElement(By.xpath(attrXPath));
+
+        } catch (Exception e){
+            throw new NoSuchElementException("Element not found with the provided XPath");
+        }
+
+        String attr = attrElement.getAttribute("href");
+        System.out.println("Extracted attribute: " + attr);
     }
 
     @Test
-    @DisplayName("웹 사이트에서 원하는 텍스트를 잘 가지고 오는 지 테스트")
+    @DisplayName("XPath로 웹 사이트에서 원하는 텍스트를 잘 가지고 오는 지 테스트")
     public void testValidTextXPath(){
+
         WebElement textElement;
+
+        String textXPath = "//*[@id=\"content\"]/div[2]/div[1]/div[2]/div[3]/dl/dd/div/a/div[1]/span[2]/em";
+
         try{
             //xpath로 찾는 경우
-//            textElement = driver.findElement(By.xpath(textXPath));
+            textElement = driver.findElement(By.xpath(textXPath));
 
+        } catch(Exception e){
+            throw new NoSuchElementException("Element not found with the provided XPath");
+        }
+        String text = textElement.getText();
+        System.out.println("Extracted text: " + text);
+    }
+
+    @Test
+    @DisplayName("ClassName 으로 웹 사이트에서 원하는 텍스트를 잘 가지고 오는 지 테스트")
+    public void testValidTextClassName(){
+        WebElement textElement;
+
+        try{
             //클래스 이름으로 찾는 경우
-//            textElement = driver.findElement(By.className("detailStar"));
+            textElement = driver.findElement(By.className("ssg_price"));
 
+        } catch(Exception e){
+            throw new NoSuchElementException("Element not found with the provided XPath");
+        }
+        String text = textElement.getText();
+        System.out.println("Extracted text: " + text);
+    }
+
+    @Test
+    @DisplayName("XPath로 웹 사이트에서 원하는 텍스트를 잘 가지고 오는 지 테스트")
+    public void testValidTextCss(){
+        WebElement textElement;
+        String textCss = "em[class='ssg_price']";
+        try{
             //css로 찾는 경우
-            textElement = driver.findElement(By.cssSelector("div.textSubject > h1"));
+            textElement = driver.findElement(By.cssSelector(textCss));
         } catch(Exception e){
             throw new NoSuchElementException("Element not found with the provided XPath");
         }
@@ -70,6 +118,8 @@ public class XPathTest {
 
     @Test
     public void testElevenDiscountRateXPath(){
+
+        String discountXPath = "";
 
         driver.get(siteUrl);
         WebElement discountRate = null;
@@ -85,7 +135,6 @@ public class XPathTest {
         }
 
         System.out.println(discountText);
-
 
     }
 

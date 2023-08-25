@@ -14,7 +14,7 @@ public class WebDriverConfig {
 
     @Bean
     public WebDriver webDriver(){
-        System.setProperty("webdriver.chrome.driver", "C:\\Users\\msong\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\msong\\Desktop\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
         return new ChromeDriver(getOptions());
     }
 

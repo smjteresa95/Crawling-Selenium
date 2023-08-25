@@ -16,13 +16,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class XpathClickTest {
     WebDriver driver;
     WebDriverWait wait;
 
-    String siteUrl = "https://www.oasis.co.kr/product/detail/77645-1088094?categoryId=246";
+    String siteUrl = "https://www.ssg.com/disp/category.ssg?ctgId=6000093748";
     String detailTag = "//*[@id=\"pViewTab\"]/ul/li[2]/a[@class='tabBtn btn03']";
 
     //클릭 후 상품명이 존재하는 지 확인
@@ -33,12 +35,46 @@ public class XpathClickTest {
 
     @BeforeEach
     public void setUp(){
-        System.setProperty("webdriver.chrome.driver",
-                "C:\\Users\\msong\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", "C:\\Users\\msong\\Desktop\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
         driver = new ChromeDriver();
         wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         driver.get(siteUrl);
     }
+
+    @Test
+    public void navigateDetail(){
+
+        String productListTag = "//*[@id=\"ty_thmb_view\"]/ul";
+
+        String rowTag = productListTag + "/li";
+
+        List<WebElement> rows = driver.findElements(By.xpath(rowTag));
+
+        String linkTag = "./div[1]/div[2]/a";
+
+        //상세페이지 link들을 가지고 와서 리스트에 저장.
+        List<String> linkHrefs = new ArrayList<>();
+
+        for(WebElement row: rows) {
+
+            List<WebElement> links = row.findElements(By.xpath(linkTag));
+
+            for (WebElement link : links) {
+                linkHrefs.add(link.getAttribute("href"));
+            }
+        }
+
+        //for문 돌리면서 하나를 실행시키고
+        for(String href : linkHrefs){
+            driver.navigate().to(href);
+
+            //뒤로 돌아오기
+            driver.navigate().back();
+            wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(rowTag)));
+
+            System.out.println("--------------------");
+        }
+}
 
     @Test
     @DisplayName("Oasis: 제품상세페이지에서 상품상세정보 탭 클릭이 되는 지 확인")
