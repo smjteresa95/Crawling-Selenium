@@ -1,19 +1,24 @@
 package com.example.data_collection.service.FinalSeleniumService;
 
+import com.example.data_collection.domain.entity.OasisDataEntity;
+import com.example.data_collection.domain.entity.OasisDataRepository;
 import com.example.data_collection.exception.NoMorePagesException;
-import com.example.data_collection.service.WebDriverService;
-import jakarta.annotation.PostConstruct;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
-public class OasisService {
+@Order(4)
+public class OasisService extends CrawlingService{
 
     int currentPage;
 
@@ -57,29 +62,33 @@ public class OasisService {
     String nutritionFactImgTag = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[@class='conts_productInfo_notice img']/div/img";
 
 
-    //3. next button tag
-//    String nextButtonTag = String.format("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@href = 'javascript:page(%d);']", currentPage+1);
+    //3. 테이블 안의 정보 가지고 오는 탭
+    String tablePath = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[1]/table/tbody/tr[2]/td/table/tbody";
+
+    String rowPath = tablePath + "/tr";
+
+    //상품명, 용량/수량/크기, 영양성분 등
+    String titleCellPath = "./td[1]/font/strong";
+
+    //title cell의 값
+    String valuePath ="./td[3]";
+
+
+    //4. next button tag
     public String getNextPageButtonXpath(int currentPage){
         return String.format("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@href = 'javascript:page(%d);']", currentPage+1);
     }
 
     String nextGroupTag = "//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@class='pgBtn_next']";
-
-
-    WebDriverService webDriverService;
-
-    WebDriver driver;
-
-    WebDriverWait wait;
+    private final OasisDataRepository repository;
 
     @Autowired
-    public OasisService(WebDriverService webDriverService){
-        this.webDriverService = webDriverService;
-        driver = webDriverService.getDriver();
-        wait = webDriverService.getWait();
+    public OasisService(WebDriver driver, WebDriverWait wait, OasisDataRepository repository){
+        super(driver, wait);
+        this.repository = repository;
     }
 
-//    @PostConstruct
+    @Override
     public void startCrawling(){
         List<String> categoryCodes = Arrays.asList(sideDishCode, saladCode);
 
@@ -125,6 +134,21 @@ public class OasisService {
 
     }
 
+    //페이지 넘어가는 부분
+
+    //파라미터에 따라서, 다음페이지로 넘어갈 수도, 다음 그룹으로 넘어갈 수도 있다.
+    public void moveToNextPageOrGroup(String nextButtonXPath){
+        try {
+            WebElement pageButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextButtonXPath)));
+            pageButton.click();
+
+            currentPage++;
+
+        } catch (TimeoutException e){
+            throw new NoMorePagesException("No more page to navigate");
+        }
+    }
+
 
     //제품 디테일 페이지로 이동
     public void crawlDetailPage(){
@@ -146,9 +170,7 @@ public class OasisService {
             openDetailTab();
 
             //디테일 페이지에 있는 상품정보 가지고 오기
-            getItemInfo();
-
-            getItemInfoFromTable();
+//            getItemInfo();
 
             //뒤로 돌아오기
             driver.navigate().back();
@@ -168,25 +190,16 @@ public class OasisService {
         }
     }
 
+
+    //title과 cell을 매핑 할 Map 객체 초기화
+    Map<String, String> results = new HashMap<>();
+
     //제품 상세 탭의 제품상세테이블에서 항목의 유무를 확인 후 있는 경우 값을 가지고 오기.
     public void getItemInfoFromTable(){
-        String tablePath = "//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[1]/table/tbody/tr[2]/td/table/tbody";
-
-        String rowPath = tablePath + "/tr";
-
-        //상품명, 용량/수량/크기, 영양성분 등
-        String titleCellPath = "./td[1]/font/strong";
-
-        //title cell의 값
-        String valuePath ="./td[3]";
-
 
         //테이블의 행들을 가지고 오기
         //테이블에 값이 존재 하는데 가지고 오지 못하는 경우가 생긴다.
         List<WebElement> rows = driver.findElements(By.xpath(rowPath));
-
-        //title과 cell을 매핑 할 Map 객체 초기화
-        Map<String, String> results = new HashMap<>();
 
         //테이블 안에서 가지고 와야 할 항목들의 리스트
         List<String> titles = Arrays.asList("상품명", "용량/수량/크기", "원재료 및 함량", "영양성분");
@@ -207,10 +220,11 @@ public class OasisService {
 
                     value = row.findElement(By.xpath(valuePath)).getText();
 
+
                     results.put(title, value);
                     }
                 } catch(NoSuchElementException e){
-                    System.out.println("Hey, No value nor title found: " + row.getText());
+                    System.out.println("No value nor title found: " + row.getText());
                 }
 
             } catch (Exception e){
@@ -223,81 +237,134 @@ public class OasisService {
         }
     }
 
+    private Double getRating(String input) {
+        Pattern pattern = Pattern.compile("([0-9]*\\.?[0-9]+)");  // regex to extract floating point numbers
+        Matcher matcher = pattern.matcher(input);
+
+        if (matcher.find()) {
+            return Double.parseDouble(matcher.group(1));
+        }
+        return null;
+    }
+
     //제품 디테일 페이지에서 상품정보 가지고 오기
-    public void getItemInfo(){
-        String salesName = getDataByCss(salesNameTag).getText();
-        System.out.println(salesName);
+//    public void getItemInfo(){
+//
+//
+//        OasisDataEntity.OasisDataBuilder builder = OasisDataEntity.builder();
+//
+//        WebElement salesName = getDataByCss(salesNameTag);
+//        if(salesName != null) {
+//            builder.salesName(salesName.getText());
+//        } else {
+//            builder.salesName(null);
+//        }
+//
+//
+//        WebElement actualPrice = getDataByCss(actualPriceTag);
+//        if(actualPrice != null) {
+//            //쉼표 제외하고 int형으로 변경
+//            builder.actualPrice(Integer.parseInt(actualPrice.getText().replace(",", "")));
+//        } else {
+//            builder.actualPrice(0);
+//        }
+//
+//
+//        //쉼표 제외하고 int형으로 변경
+//        WebElement discountPrice = getDataByXpath(discountPriceTag);
+//        if(discountPrice != null) {
+//            builder.discountPrice(Integer.parseInt(discountPrice.getText().replace(",", "")));
+//        } else{
+//            builder.discountPrice(0);
+//        }
+//
+//        //%를 제외한 숫자만 남기기
+//        WebElement discountRate = getDataByCss(discountRateTag);
+//        if(discountRate != null){
+//            builder.discountRate(Integer.parseInt(discountRate.getText().replace("%","")));
+//        } else {
+//            builder.discountRate(0);
+//        }
+//
+//        //평점 문자열 처리
+//        WebElement rating = getDataByClass(ratingTag);
+//        if(rating != null){
+//            builder.rating(getRating(rating.getText()));
+//        } else{
+//            builder.rating(0.0);
+//        }
+//
+//        System.out.println(rating);
+//
+//        //이미지 가지고 오기
+//        WebElement image = getDataByXpath(imageTag);
+//        if(image != null){
+//            String imageStr = image.getAttribute("src");
+//            builder.image(imageStr);
+//        } else {
+//            builder.nutriImage(null);
+//        }
+//
+//        WebElement nutritionFacts = getDataByXpath(nutritionFactImgTag);
+//        if (nutritionFacts != null) {
+//            String nutritionFactsImg = nutritionFacts.getAttribute("src");
+//            builder.nutriImage(nutritionFactsImg);
+//        } else {
+//            builder.nutriImage(null);
+//        }
+//
+//        //상세정보테이블에 있는 데이터 저장
+//
+//        //스크래핑한 데이터를 entity에 매핑해야 한다.
+//        Map<String, String> titleMapping = new HashMap<>();
+//        titleMapping.put("상품명", "productName");
+//        titleMapping.put("용량/수량/크기", "serving");
+//        titleMapping.put("원재료 및 함량", "ingredient");
+//        titleMapping.put("영양성분", "NutriFacts");
+//
+//        getItemInfoFromTable();
+//
+//        for (Map.Entry<String, String> entry : titleMapping.entrySet()) {
+//            String title = entry.getKey();
+//            String builderMethod = entry.getValue();
+//
+//            String value = results.get(title);
+//            if (value != null) {
+//                try {
+//                    Method method = builder.getClass().getMethod(builderMethod, String.class);
+//                    method.invoke(builder, value);
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        }
+//
+////        for(String title : results.keySet()) {
+////            String column = titleMapping.get(title);
+////            if(column != null) {
+////                switch(column) {
+////                    case "productName":
+////                        oasisData.setProductName(results.get(title));
+////                        break;
+////                    case "serving":
+////                        oasisData.setServing(results.get(title));
+////                        break;
+////                    case "ingredients":
+////                        oasisData.setIngredients(results.get(title));
+////                        break;
+////                    case "NutriFacts":
+////                        oasisData.setNutriFacts(results.get(title));
+////                        break;
+////                }
+////            }
+////        }
+//        OasisDataEntity data = (OasisDataEntity) builder.build();
+//        repository.save(data);
+//
+//    }
 
-        String actualPrice =  getDataByCss(actualPriceTag).getText();
-        System.out.println(actualPrice);
 
-        String discountPrice = getDataByXpath(discountPriceTag).getText();
-        System.out.println(discountPrice);
 
-        String discountRate = getDataByCss(discountRateTag).getText();
-        System.out.println(discountRate);
-
-        String rating = getDataByClass(ratingTag).getText();
-        System.out.println(rating);
-
-        //이미지 가지고 오기
-        WebElement image = getDataByXpath(imageTag);
-        if(image != null){
-            String imageStr = image.getAttribute("src");
-            System.out.println(imageStr);
-        } else {
-            System.out.println("상품이미지를 찾을 수 없습니다.");
-        }
-
-        WebElement nutritionFacts = getDataByXpath(nutritionFactImgTag);
-        if (nutritionFacts != null) {
-            String nutritionFactsImg = nutritionFacts.getAttribute("src");
-            System.out.println(nutritionFactsImg);
-        } else {
-            System.out.println("성분이미지를 찾을 수 없습니다.");
-        }
-    }
-
-    public WebElement getDataByXpath(String tag){
-        try {
-            return driver.findElement(By.xpath(tag));
-        } catch(NoSuchElementException e){
-            System.out.println("요소를 찾지 못했습니다:" + tag);
-            return null;
-        }
-    }
-
-    public WebElement getDataByCss(String tag){
-        try {
-            return driver.findElement(By.cssSelector(tag));
-        } catch(NoSuchElementException e){
-            System.out.println("요소를 찾지 못했습니다:" + tag);
-            return null;
-        }
-    }
-
-    public WebElement getDataByClass(String tag){
-        try {
-            return driver.findElement(By.className(tag));
-        } catch(NoSuchElementException e){
-            System.out.println("요소를 찾지 못했습니다: " + tag);
-            return null;
-        }
-    }
-
-    //페이지 넘어가는 부분
-
-    //파라미터에 따라서, 다음페이지로 넘어갈 수도, 다음 그룹으로 넘어갈 수도 있다.
-    public void moveToNextPageOrGroup(String nextButtonXPath){
-        try {
-            WebElement pageButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextButtonXPath)));
-            pageButton.click();
-
-            currentPage++;
-        } catch (TimeoutException e){
-            throw new NoMorePagesException("No more page to navigate");
-        }
-    }
 
 
 

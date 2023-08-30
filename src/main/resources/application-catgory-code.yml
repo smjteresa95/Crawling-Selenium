@@ -1,0 +1,38 @@
+sites:
+  oasis:
+#    간식
+    sandwich: 1101
+    cookie: 1102
+    nuts: 13
+    dairy: 51
+    snack: 25
+    bread: 248
+    grainPowder: 24
+    candy: 26
+    cereal: 249
+    breakfast: 60
+#  수산가공
+    seafood: 21
+    chicken: 16
+    meat: 17
+#    즉석섭취식품
+    salad: 137
+    noodle: 64
+    tofu: 242
+    sausage: 56
+    pickledDish: 34
+    sideDish: 243
+    curry: 23
+    pancake: 45
+    meal: 57
+    midnight: 87
+    soup: 33
+#      음료
+    coffee: 28
+    koreanDrink: 144
+    tea: 145
+    pressedDrink: 48
+
+
+
+

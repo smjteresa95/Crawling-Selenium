@@ -4,11 +4,7 @@ import com.example.data_collection.config.SearchHtmlTagConfigFactory;
 import com.example.data_collection.domain.PublicDataRepository;
 import com.example.data_collection.domain.searchentity.SearchElevenStRawData;
 import com.example.data_collection.domain.searchentity.SearchElevenStRawDataRepository;
-import com.example.data_collection.service.WebDriverService;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -30,9 +26,9 @@ public class ElevenStSearchCrawlerService extends BaseSearchCrawler<SearchEleven
     @Autowired
     ElevenStSearchCrawlerService(SearchHtmlTagConfigFactory htmlTag,
                                  SearchElevenStRawDataRepository searchElevenStRawDataRepository,
-                                 WebDriverService webDriverService,
+                                 WebDriver driver,
                                  PublicDataRepository publicDataRepository) throws IllegalAccessException {
-        super(htmlTag, webDriverService, SITE_NAME);
+        super(htmlTag, driver, SITE_NAME);
         this.searchElevenStRawDataRepository = searchElevenStRawDataRepository;
         this.publicDataRepository = publicDataRepository;
     }

@@ -87,6 +87,19 @@ public class XpathClickTest {
         assertThat(result.getText()).isEqualTo("백제원 한우사골 고기곰탕");
     }
 
+
+    @Test
+    @DisplayName("market Kurly: 다음페이지로 넘어가는 버튼이 클릭이 되는 지 확인")
+    public void clickNextPage(){
+        int currentPage = 1;
+        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(detailTag)));
+        element.click();
+
+        WebElement result = driver.findElement(By.xpath(assertTag));
+        System.out.println(result.getText());
+        assertThat(result.getText()).isEqualTo("백제원 한우사골 고기곰탕");
+    }
+
     @Test
     @DisplayName("상품 이미지/링크 잘 가지고 오는지 테스트")
     public void testValidAttrXPath(){

@@ -25,9 +25,20 @@ public class DatabaseLoader implements CommandLineRunner{
 
     private void initCategoryDatabase() {
 
-        List<String> categories = List.of("밀키트", "도시락", "간식/음료", "샐러드", "유제품", "냉장/냉동식품");
+        List<String> subCategories = List.of(
+                "과자류, 빵류 또는 떡류",
+                "빙과류", "알가공품류",
+                "코코아가공품류 또는 초콜릿류",
+                "수산가공식품류",
+                "식육가공품 및 포장육",
+                "유가공품",
+                "음료류",
+                "장기보존식품",
+                "즉석식품류",
+                "특수용도식품"
+                );
 
-        for(String categoryName : categories){
+        for(String categoryName : subCategories){
             Optional<Category> existingCategory = categoryRepository.findByCategoryName(categoryName);
             if(existingCategory.isEmpty()){
                 categoryRepository.save(Category.builder().categoryName(categoryName).build());

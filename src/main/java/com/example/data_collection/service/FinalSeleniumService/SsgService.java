@@ -1,19 +1,20 @@
 package com.example.data_collection.service.FinalSeleniumService;
 
+import com.example.data_collection.domain.entity.SsgDataRepository;
 import com.example.data_collection.exception.NoMorePagesException;
-import com.example.data_collection.service.WebDriverService;
-import jakarta.annotation.PostConstruct;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-public class SsgService {
+@Order(2)
+public class SsgService extends CrawlingService{
 
 
     int currentPage;
@@ -60,42 +61,33 @@ public class SsgService {
     String nextGroupTag = "//div[@class='com_paginate notranslate']//a[@class='btn_next on' and @title='다음']";
 
 
-    WebDriverService webDriverService;
-
-    WebDriver driver;
-
-    WebDriverWait wait;
+    private final SsgDataRepository repository;
 
     @Autowired
-    public SsgService(WebDriverService webDriverService){
-        this.webDriverService = webDriverService;
-        driver = webDriverService.getDriver();
-        wait = webDriverService.getWait();
+    public SsgService(WebDriver driver, WebDriverWait wait, SsgDataRepository repository){
+        super(driver, wait);
+        this.repository = repository;
     }
 
-    @PostConstruct
+    @Override
     public void startCrawling(){
         List<String> categoryCodes = Arrays.asList(coffeeCode, koreanSnackCode);
 
-//        for(String code : categoryCodes) {
-//            driver.get(siteUrl + code);
-//
-//            currentPage = 1;
-//
-//            while(true){
-//                try {
-//                    crawlAllProducts();
-//                } catch (NoMorePagesException e){
-//                    System.out.println("넘어갈 페이지가 없습니다.");
-//                    break;
-//                }
-//            }
-//
-//        }
-//            driver.get("https://www.ssg.com/item/itemView.ssg?itemId=1000039918398&siteNo=6001&salestrNo=6005&advertBidId=1007351749&advertExtensTeryDivCd=10");
-//            getItemInfoFromTable();
-        driver.get("https://www.ssg.com/disp/category.ssg?ctgId=6000093748");
-        crawlAllProducts();
+        for(String code : categoryCodes) {
+            driver.get(siteUrl + code);
+
+            currentPage = 1;
+
+            while(true){
+                try {
+                    crawlAllProducts();
+                } catch (NoMorePagesException e){
+                    System.out.println("넘어갈 페이지가 없습니다.");
+                    break;
+                }
+            }
+
+        }
 }
 
 
@@ -124,6 +116,20 @@ public class SsgService {
         }
     }
 
+    //페이지 넘어가는 부분
+
+    //파라미터에 따라서, 다음페이지로 넘어갈 수도, 다음 그룹으로 넘어갈 수도 있다.
+    public void moveToNextPageOrGroup(String nextButtonXPath){
+        try {
+            WebElement pageButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextButtonXPath)));
+            pageButton.click();
+
+            currentPage++;
+
+        } catch (TimeoutException e){
+            throw new NoMorePagesException("No more page to navigate");
+        }
+    }
 
     //제품 디테일 페이지로 이동
     public void crawlDetailPage(){
@@ -274,30 +280,6 @@ public class SsgService {
         driver.switchTo().defaultContent();
     }
 
-    public WebElement getDataByXpath(String tag){
-        try {
-            return driver.findElement(By.xpath(tag));
-        } catch(Exception e){
-            System.out.println("요소를 찾지 못했습니다:" + tag);
-            return null;
-        }
-    }
-
-
-    //페이지 넘어가는 부분
-
-    //파라미터에 따라서, 다음페이지로 넘어갈 수도, 다음 그룹으로 넘어갈 수도 있다.
-    public void moveToNextPageOrGroup(String nextButtonXPath){
-        try {
-            WebElement pageButton = wait.until(ExpectedConditions.elementToBeClickable(By.xpath(nextButtonXPath)));
-
-            pageButton.click();
-
-            currentPage++;
-        } catch (TimeoutException e){
-            throw new NoMorePagesException("No more page to navigate");
-        }
-    }
 
 
 }

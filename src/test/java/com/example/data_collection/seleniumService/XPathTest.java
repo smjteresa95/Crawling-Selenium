@@ -8,12 +8,14 @@ import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.interactions.Actions;
 
+import java.util.List;
+
 public class XPathTest {
 
     private WebDriver driver;
 
-//    String siteUrl = "https://www.kurly.com/categories/912001";
-    String siteUrl = "https://www.ssg.com/disp/category.ssg?ctgId=6000093748";
+    String siteUrl = "https://www.kurly.com/goods/1000146000";
+
 
 
     @BeforeEach
@@ -47,10 +49,11 @@ public class XPathTest {
 
     }
     @Test
-    @DisplayName("상품 이미지/링크 잘 가지고 오는지 테스트")
+    @DisplayName("상품 이미지 잘 가지고 오는지 테스트")
     public void testValidAttrXPath(){
 
-        String attrXPath = "//*[@id=\"ty_thmb_view\"]/ul/li[2]/div[1]/div[2]/a[@class='clickable']";
+        String attrXPath = "//*[@id=\"detail\"]/div[2]/img[@alt='자세히보기 이미지']";
+
 
         WebElement attrElement;
         try{
@@ -60,8 +63,34 @@ public class XPathTest {
             throw new NoSuchElementException("Element not found with the provided XPath");
         }
 
-        String attr = attrElement.getAttribute("href");
+        String attr = attrElement.getAttribute("src");
         System.out.println("Extracted attribute: " + attr);
+    }
+
+    @Test
+    @DisplayName("상품 디테일 링크로 잘 이동하면서 왔다갔다 잘 하는지 테스트")
+    public void testNavigateToLink(){
+
+        String attrXPath = "//*[@id=\"container\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]";
+
+        List<WebElement> attrElements;
+        try{
+            attrElements = driver.findElements(By.xpath(attrXPath));
+
+        } catch (Exception e){
+            throw new NoSuchElementException("Element not found with the provided XPath");
+        }
+
+        for(WebElement attrElement : attrElements) {
+            String attr = attrElement.getAttribute("href");
+            System.out.println("Extracted attribute: " + attr);
+
+            driver.navigate().to(attr);
+
+//            driver.navigate().back();
+        }
+
+
     }
 
     @Test
@@ -70,7 +99,7 @@ public class XPathTest {
 
         WebElement textElement;
 
-        String textXPath = "//*[@id=\"content\"]/div[2]/div[1]/div[2]/div[3]/dl/dd/div/a/div[1]/span[2]/em";
+        String textXPath = "//*[@id=\"product-atf\"]/section/h2/span[1]";
 
         try{
             //xpath로 찾는 경우

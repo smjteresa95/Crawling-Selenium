@@ -4,8 +4,8 @@ import com.example.data_collection.config.SearchHtmlTagConfigFactory;
 import com.example.data_collection.domain.PublicDataRepository;
 import com.example.data_collection.domain.searchentity.SearchSsgRawData;
 import com.example.data_collection.domain.searchentity.SearchSsgRawDataRepository;
-import com.example.data_collection.service.WebDriverService;
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
@@ -28,9 +28,9 @@ public class SsgSearchCrawlerService extends BaseSearchCrawler<SearchSsgRawData,
     @Autowired
     public SsgSearchCrawlerService(SearchSsgRawDataRepository searchSsgRawDataRepository,
                                    SearchHtmlTagConfigFactory htmlTag,
-                                   WebDriverService webDriverService,
+                                   WebDriver driver,
                                    PublicDataRepository publicDataRepository) throws IllegalAccessException {
-        super(htmlTag, webDriverService, SITE_NAME);
+        super(htmlTag, driver, SITE_NAME);
         this.searchSsgRawDataRepository = searchSsgRawDataRepository;
         this.publicDataRepository = publicDataRepository;
     }

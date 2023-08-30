@@ -24,12 +24,10 @@ public class XpathButtonTest {
 
     private WebDriver driver;
 
-    String siteUrl = "https://www.oasis.co.kr/product/list?categoryId=25";
+    String siteUrl = "https://www.kurly.com/categories/911";
     int currentPage;
-
-    //*[@id="container"]/div/div[2]/div[3]/a[3]
     public String getNextPageButtonXpath(int currentPage){
-        return String.format("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@href = 'javascript:page(%d);']", currentPage+1);
+        return String.format("//*[@id='container']/div[2]/div[2]/div[3]/a[%d]", currentPage+1);
     }
 
     @BeforeEach

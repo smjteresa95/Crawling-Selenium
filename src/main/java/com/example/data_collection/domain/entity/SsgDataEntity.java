@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name ="eleven_st_raw_data")
-public class ElevenStRawData extends BaseRawData {
-
+@Table(name="ssg_data")
+public class SsgDataEntity extends BaseDataEntity {
 }

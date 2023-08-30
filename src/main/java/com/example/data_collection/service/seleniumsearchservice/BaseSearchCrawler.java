@@ -2,9 +2,7 @@ package com.example.data_collection.service.seleniumsearchservice;
 
 import com.example.data_collection.config.SearchHtmlTagConfig;
 import com.example.data_collection.config.SearchHtmlTagConfigFactory;
-import com.example.data_collection.domain.entity.BaseRawData;
 import com.example.data_collection.domain.searchentity.BaseSearchRawData;
-import com.example.data_collection.service.WebDriverService;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -13,6 +11,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.io.Serializable;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,13 +19,12 @@ abstract public class BaseSearchCrawler<T extends BaseSearchRawData, ID extends 
 
     SearchHtmlTagConfigFactory htmlTagFactory;
     SearchHtmlTagConfig tag;
-    WebDriverService webDriverService;
     WebDriver driver;
     WebDriverWait wait;
     String siteName;
 
 
-     BaseSearchCrawler(SearchHtmlTagConfigFactory htmlTag, WebDriverService webDriverService, String siteName)
+     BaseSearchCrawler(SearchHtmlTagConfigFactory htmlTag, WebDriver driver, String siteName)
              throws IllegalAccessException {
 
         this.siteName = siteName;
@@ -34,9 +32,8 @@ abstract public class BaseSearchCrawler<T extends BaseSearchRawData, ID extends 
         this.htmlTagFactory = htmlTag;
         this.tag = htmlTag.getHtmlTagForSite(siteName);
 
-        this.webDriverService = webDriverService;
-        this.driver = webDriverService.getDriver();
-        this.wait = webDriverService.getWait();
+        this.driver = driver;
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
     }
 
     abstract T createRawDataInstance();
