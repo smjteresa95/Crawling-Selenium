@@ -11,25 +11,11 @@ public abstract class CrawlingService implements Crawling{
     WebDriver driver;
     WebDriverWait wait;
 
-
-//    HtmlConfigFactory htmlFactory;
-//    HtmlConfig tag;
-//    String siteName;
-
-//    public void reloadHtmlConfig(){
-//        try{
-//            this.tag = htmlFactory.getTagForSite(siteName, currentPage);
-//
-//        } catch (IllegalAccessException e){
-//            e.printStackTrace();
-//        }
-//    }
-
     @Autowired
-    CrawlingService(WebDriver driver, WebDriverWait wait){
+    CrawlingService(WebDriver driver){
 
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+        this.wait = new WebDriverWait(driver, Duration.ofMinutes(5));
     }
 
     public WebElement getDataByXpath(String tag){

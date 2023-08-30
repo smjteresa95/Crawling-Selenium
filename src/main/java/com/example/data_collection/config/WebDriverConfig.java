@@ -21,7 +21,7 @@ public class WebDriverConfig {
 
     @Bean
     public WebDriverWait webDriverWait(WebDriver driver){
-        return new WebDriverWait(driver, Duration.ofSeconds(60));
+        return new WebDriverWait(driver, Duration.ofMinutes(5));
     }
 
     public ChromeOptions getOptions(){

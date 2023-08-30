@@ -2,12 +2,13 @@ package com.example.data_collection.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 @MappedSuperclass
 
 @Setter
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
-@Builder
+@AllArgsConstructor
+@SuperBuilder
 @Getter
 @NoArgsConstructor
 @ToString

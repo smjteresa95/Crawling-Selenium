@@ -43,7 +43,8 @@ public class HtmlConfigFactory {
             case "ssg":
                 return HtmlConfig.builder()
                         .siteUrl("https://www.ssg.com/disp/category.ssg?ctgId=")
-                        .link("")
+                        .itemList("//*[@id=\"ty_thmb_view\"]/ul/li")
+                        .link("./div[1]/div[2]/a")
                         .detailTab("")
 
                         .salesName("//*[@id=\"content\"]/div[2]/div[1]/div[2]/div[2]/h2/span/span[@class='cdtl_info_tit_txt']")
@@ -54,9 +55,26 @@ public class HtmlConfigFactory {
                         .image("//*[@id=\"mainImg\"]")
                         .nutriImage("//*[@id=\"wrap_ifr\"]/div/div[@Class='cdtl_tmpl_guide']/div/div/div[2]/img[contains(@alt, '품질표시이미지')]")
 
+                        .iframe("_ifr_html")
+                        .tablePath("//div[@class='cdtl_sec']/div[@class='cdtl_cont_info']//table/tbody")
+                        .rowPath("//div[@class='cdtl_sec']/div[@class='cdtl_cont_info']//table/tbody"+"/tr")
+                        .titlePath("./th/div[@class='in']")
+                        .valuePath("./td/div[@class='in']")
+
                         .nextPageButton(getSsgNextPageButtonXpath(currentPage))
                         .nextGroupButton("//div[@class='com_paginate notranslate']//a[@class='btn_next on' and @title='다음']")
 
+                        .build();
+
+            case "kurly":
+                return HtmlConfig.builder()
+                        .siteUrl("https://www.kurly.com/categories/")
+
+                        //디테일 페이지로 넘어가기 전, 리스트 있는 부분에서 이미지 링크를 가지고 와야한다.
+                        .image("//*[@id=\"container\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]/div[1]/div/span/img")
+                        .link("//*[@id=\"container\\\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]")
+                        .salesName("//*[@id=\"product-atf\"]/section/div[2]/div/h1")
+                        .actualPrice("//*[@id=\"product-atf\"]/section/span")
                         .build();
 
             default:

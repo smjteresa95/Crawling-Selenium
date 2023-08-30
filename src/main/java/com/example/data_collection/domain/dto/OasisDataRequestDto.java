@@ -15,8 +15,6 @@ public class OasisDataRequestDto {
 
     private String salesName;
 
-    private String brand;
-
     private int actualPrice;
 
     private int discountPrice;
@@ -44,7 +42,6 @@ public class OasisDataRequestDto {
                 .categoryName(categoryName)
                 .subcategoryName(subcategoryName)
                 .salesName(salesName)
-                .brand(brand)
                 .actualPrice(actualPrice)
                 .discountPrice(discountPrice)
                 .discountRate(discountRate)

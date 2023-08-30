@@ -23,6 +23,7 @@ public class HtmlConfig {
     private String image;
     private String nutriImage;
 
+    private String iframe;
     private String tablePath;
     private String rowPath;
     private String titlePath;

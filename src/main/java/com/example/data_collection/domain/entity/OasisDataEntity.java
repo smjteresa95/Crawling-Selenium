@@ -26,9 +26,6 @@ public class OasisDataEntity{
     @Column(name = "sales_name")
     private String salesName;
 
-    @Column(name = "brand")
-    private String brand;
-
     @Column(name = "actual_price")
     private int actualPrice;
 
