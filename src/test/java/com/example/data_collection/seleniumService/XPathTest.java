@@ -6,15 +6,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.interactions.Actions;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.ArrayList;
 import java.util.List;
 
 public class XPathTest {
 
     private WebDriver driver;
 
-    String siteUrl = "https://www.kurly.com/goods/1000146000";
+//    String siteUrl = "https://www.kurly.com/goods/1000146000";
+
+    String siteUrl = "https://www.kurly.com/categories/910";
+
 
 
 
@@ -90,6 +95,21 @@ public class XPathTest {
 //            driver.navigate().back();
         }
 
+    }
+
+    @Test
+    @DisplayName("kurly: 제품 상세링크들 모두 받아와서 리스트로 받아올 수 있는 지 테스트")
+    public void getItemDetailLinks(){
+        String attrXPath = "//a[starts-with(@href, '/goods/')]";
+
+        List<WebElement> hrefLinks = driver.findElements(By.xpath(attrXPath));
+        List<String> links = new ArrayList<>();
+
+        for(WebElement href : hrefLinks){
+            links.add(href.getAttribute("href"));
+        }
+
+        assertThat(links.get(0)).isEqualTo("https://www.kurly.com/goods/5055948");
 
     }
 

@@ -5,15 +5,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class HtmlConfigFactory {
 
-    public String getOasisNextPageButtonXpath(int currentPage){
-        return String.format("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@href = 'javascript:page(%d);']", currentPage+1);
-    }
-
-    public String getSsgNextPageButtonXpath(int currentPage){
-        return "//div[@class='com_paginate notranslate']//a[contains(text(), '" + (currentPage + 1) + "')]";
-    }
-
-    public HtmlConfig getTagForSite(String siteName, int currentPage) throws IllegalAccessException {
+    public HtmlConfig getTagForSite(String siteName) throws IllegalAccessException {
         switch (siteName){
             case "oasis":
                 return HtmlConfig.builder()
@@ -34,9 +26,6 @@ public class HtmlConfigFactory {
                         .rowPath("//*[@id=\"pViewTabCon\"]/div[2]/div[3]/div[1]/table/tbody/tr[2]/td/table/tbody" + "/tr")
                         .titlePath("./td[1]/font/strong")
                         .valuePath("./td[3]")
-
-                        .nextPageButton(getOasisNextPageButtonXpath(currentPage))
-                        .nextGroupButton("//*[@id=\"sec_product_list\"]/div[4]/div[3]/a[@class='pgBtn_next']")
 
                         .build();
 
@@ -61,9 +50,6 @@ public class HtmlConfigFactory {
                         .titlePath("./th/div[@class='in']")
                         .valuePath("./td/div[@class='in']")
 
-                        .nextPageButton(getSsgNextPageButtonXpath(currentPage))
-                        .nextGroupButton("//div[@class='com_paginate notranslate']//a[@class='btn_next on' and @title='다음']")
-
                         .build();
 
             case "kurly":
@@ -72,9 +58,16 @@ public class HtmlConfigFactory {
 
                         //디테일 페이지로 넘어가기 전, 리스트 있는 부분에서 이미지 링크를 가지고 와야한다.
                         .image("//*[@id=\"container\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]/div[1]/div/span/img")
-                        .link("//*[@id=\"container\\\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]")
+                        .link("//a[starts-with(@href, '/goods/')]")
+
                         .salesName("//*[@id=\"product-atf\"]/section/div[2]/div/h1")
                         .actualPrice("//*[@id=\"product-atf\"]/section/span")
+                        .discountPrice("//*[@id=\"product-atf\"]/section/h2/span[2]")
+                        .discountRate("//*[@id=\"product-atf\"]/section/h2/span[1]")
+
+                        .nutriImage("//*[@id=\"detail\"]/div[2]/img[@alt='자세히보기 이미지']")
+
+                        .nextPageButton("//*[@id=\"container\"]/div[2]/div[2]/div[3]/a[13]/img")
                         .build();
 
             default:

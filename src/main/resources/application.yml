@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: db, api, category-code
+    active: db
   jpa:
     hibernate:
       ddl-auto: update

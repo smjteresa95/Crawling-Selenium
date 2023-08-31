@@ -1,7 +1,6 @@
 package com.example.data_collection.service;
 
-import com.example.data_collection.service.FinalSeleniumService.Crawling;
-import com.example.data_collection.service.seleniumsearchservice.SearchCrawler;
+import com.example.data_collection.service.seleniumservice.Crawler;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.openqa.selenium.WebDriver;
@@ -16,19 +15,19 @@ import java.util.*;
 public class CrawlerService {
 
     WebDriver driver;
-    List<Crawling> crawlingList;
+    List<Crawler> crawlerList;
 
     //FinalSeleniumService 패키지 안의 @PostConstruct 붙은 메서드들 차례대로 실행
     @Autowired
-    public CrawlerService(List<Crawling> crawlingList){
-        this.crawlingList = crawlingList;
+    public CrawlerService(List<Crawler> crawlerList){
+        this.crawlerList = crawlerList;
     }
 
     @PostConstruct
     public void crawlProductBySite() throws InterruptedException {
 
-        for(Crawling crawling : crawlingList){
-            crawling.startCrawling();
+        for(Crawler crawler : crawlerList){
+            crawler.startCrawling();
         }
     }
 

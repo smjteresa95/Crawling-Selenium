@@ -1,4 +1,4 @@
-package com.example.data_collection.service.FinalSeleniumService;
+package com.example.data_collection.service.seleniumservice;
 
 import com.example.data_collection.config.HtmlConfig;
 import com.example.data_collection.config.HtmlConfigFactory;
@@ -7,7 +7,6 @@ import com.example.data_collection.domain.entity.SsgDataRepository;
 import com.example.data_collection.util.CategoryCodes;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -15,8 +14,8 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@Order(2)
-public class SsgService extends CrawlingService{
+@Order(1)
+public class SsgCrawlerService extends BaseCrawler {
 
 
     int currentPage = 1;
@@ -29,12 +28,12 @@ public class SsgService extends CrawlingService{
     CategoryCodes categoryCodes;
 
     @Autowired
-    public SsgService(WebDriver driver,
-                      HtmlConfigFactory tag,
-                      SsgDataRepository repository,
-                      CategoryCodes categoryCodes) throws IllegalAccessException {
+    public SsgCrawlerService(WebDriver driver,
+                             HtmlConfigFactory tag,
+                             SsgDataRepository repository,
+                             CategoryCodes categoryCodes) throws IllegalAccessException {
         super(driver);
-        this.tag = tag.getTagForSite(SITE_NAME, currentPage);
+        this.tag = tag.getTagForSite(SITE_NAME);
         this.repository = repository;
         this.categoryCodes = categoryCodes;
 
@@ -217,11 +216,25 @@ public class SsgService extends CrawlingService{
                 System.out.println(entry.getValue());
 
             } else if(Objects.equals(entry.getKey(), "영양성분")){
-                dto.setNutriFacts(entry.getValue());
+                //제대로 된 영양성분의 값을 가지고 왔을 때만 저장
+                if(hasNutriFacts(entry.getValue())){
+                    dto.setNutriFacts(entry.getValue());
+                }
                 System.out.println(entry.getValue());
             }
         }
+    }
 
+    //영양성분에 "상세", "없음", "참조" 라는 단어가 포함되어 있으면 저장하지 않게 한다.
+    public boolean hasNutriFacts(String nutriFacts){
+
+        List<String> filter_words = Arrays.asList("상세", "없음", "참조" );
+        for(String word:filter_words){
+            if(nutriFacts.contains(word)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 
@@ -307,3 +320,6 @@ public class SsgService extends CrawlingService{
 
 
 }
+
+
+

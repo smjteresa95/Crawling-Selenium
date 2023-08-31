@@ -1,4 +1,4 @@
-package com.example.data_collection.service.FinalSeleniumService;
+package com.example.data_collection.service.seleniumservice;
 
 import org.openqa.selenium.*;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -6,14 +6,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 
-public abstract class CrawlingService implements Crawling{
+public abstract class BaseCrawler implements Crawler {
 
-    WebDriver driver;
-    WebDriverWait wait;
+    protected WebDriver driver;
+    protected WebDriverWait wait;
 
     @Autowired
-    CrawlingService(WebDriver driver){
-
+    protected BaseCrawler(WebDriver driver){
         this.driver = driver;
         this.wait = new WebDriverWait(driver, Duration.ofMinutes(5));
     }

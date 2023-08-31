@@ -1,4 +1,4 @@
-package com.example.data_collection.service.FinalSeleniumService;
+package com.example.data_collection.service.seleniumservice;
 
 import com.example.data_collection.config.HtmlConfig;
 import com.example.data_collection.config.HtmlConfigFactory;
@@ -8,7 +8,6 @@ import com.example.data_collection.util.CategoryCodes;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
@@ -19,11 +18,11 @@ import java.util.regex.Pattern;
 
 
 @Service
-@Order(1)
-public class OasisService extends CrawlingService{
+@Order(2)
+public class OasisCrawlerService extends BaseCrawler {
 
     int currentPage = 1;
-    HtmlConfig tag;
+    private HtmlConfig tag;
     OasisDataRepository repository;
     private static final String SITE_NAME = "oasis";
 
@@ -31,15 +30,14 @@ public class OasisService extends CrawlingService{
 
 
     @Autowired
-    public OasisService(WebDriver driver,
-                        WebDriverWait wait,
-                        OasisDataRepository repository,
-                        HtmlConfigFactory htmlFactory,
-                        CategoryCodes categoryCodes
+    public OasisCrawlerService(WebDriver driver,
+                               OasisDataRepository repository,
+                               HtmlConfigFactory htmlFactory,
+                               CategoryCodes categoryCodes
     ) throws IllegalAccessException {
         super(driver);
         this.repository = repository;
-        this.tag = htmlFactory.getTagForSite(SITE_NAME, currentPage);
+        this.tag = htmlFactory.getTagForSite(SITE_NAME);
         this.categoryCodes = categoryCodes;
     }
 
@@ -125,8 +123,6 @@ public class OasisService extends CrawlingService{
 
         //상품 정보 저장할 dto 객체 초기화
         OasisDataRequestDto dto;
-
-       ;
 
         //for문 돌리면서 제품상세정보 하나에 들어간다.
         for (String href : linkHrefs) {

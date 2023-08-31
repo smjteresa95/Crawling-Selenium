@@ -1,25 +1,20 @@
-package com.example.data_collection.service.FinalSeleniumService;
+package com.example.data_collection.service.seleniumservice;
 
+import com.example.data_collection.config.HtmlConfig;
+import com.example.data_collection.config.HtmlConfigFactory;
 import com.example.data_collection.exception.NoMorePagesException;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
-@Order(3)
-public class KurlyService extends CrawlingService{
+public class KurlyCrawlerService extends BaseCrawler {
 
-    int currentPage;
-
-    String siteUrl = "https://www.kurly.com/categories/";
-
-    String allCode = "911";
+    int currentPage = 1;
 
     String soupCode = "911001";
 
@@ -27,66 +22,29 @@ public class KurlyService extends CrawlingService{
 
     String sideCode = "911002";
 
-    //디테일 페이지로 넘어가기 전, 리스트 있는 부분에서 이미지 링크를 가지고 와야한다.
-    //상품이미지
-    String imageTag ="//*[@id=\"container\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]/div[1]/div/span/img";
-
-    String linkTag = "//*[@id=\"container\\\"]/div/div[2]/div[2]/a[contains(@class, 'css-9o2zup')]";
-
-    //1. 디테일 페이지에서의 상품 정보 가지고 오는 태그
-    //웹사이트에서 띄워주는 상품명 - Use By.xpath
-    String salesNameTag = "//*[@id=\"product-atf\"]/section/div[2]/div/h1";
-
-    //일반가 - Use By.xpath
-    String actualPriceTag = "//*[@id=\"product-atf\"]/section/span";
-
-    //할인가 - 할인이 적용 되지 않는 상품의 경우 일반가와 동일
-    String discountPriceTag = "//*[@id=\"product-atf\"]/section/h2/span[2]";
-
-    //할인률 - Use By.xpath
-    String discountRateTag = "//*[@id=\"product-atf\"]/section/h2/span[1]";
-
-   //마켓컬리는 평점이 없음.
-
-
-
-    //2. 상품상세정보탭에서 정보 가지고 오는 태그
-
-    //상세 정보 탭
-    //상세정보 탭 들어갈 필요 없음
-    String detailTabTag = "//*[@id=\"top\"]/div[3]/div[2]/nav/ul/li[2]/a/span";
-
-    //영양성분 이미지
-    String nutritionFactImgTag = "//*[@id=\"detail\"]/div[2]/img[@alt='자세히보기 이미지']";
-
-
-    //3. next button tag
-    public String getNextPageButtonXpath(int currentPage){
-        return "//*[@id='container']/div[2]/div[2]/div[3]/a["+(currentPage+2)+"]";
-    }
-    String nextGroupTag = "//*[@id=\"container\"]/div[2]/div[2]/div[3]/a[13]/img";
-
+    HtmlConfig tag;
 
     @Autowired
-    public KurlyService(WebDriver driver, WebDriverWait wait){
-        super(driver, wait);
+    public KurlyCrawlerService(WebDriver driver, HtmlConfigFactory htmlFactory) throws IllegalAccessException {
+        super(driver);
+        this.tag = htmlFactory.getTagForSite("kurly");
     }
 
     public void startCrawling(){
-        List<String> categoryCodes = Arrays.asList(allCode);
+        List<String> categoryCodes = Arrays.asList(soupCode);
 
         for(String code : categoryCodes) {
-            driver.get(siteUrl + code);
+            driver.get(tag.getSiteUrl() + code);
 
             currentPage = 1;
 
             while(true){
-                crawlDetailPage();
+//                crawlDetailPage();
 
                 try {
                     try {
-                            moveToNextPageOrGroup(nextGroupTag);
-                            Thread.sleep(2000);
+                        moveToNextPageOrGroup(tag.getNextPageButton());
+                        Thread.sleep(2000);
 
                     } catch (NoMorePagesException e) {
                         System.out.println("넘어갈 페이지가 없습니다.");
@@ -119,13 +77,11 @@ public class KurlyService extends CrawlingService{
     }
 
 
-
-
     //제품 디테일 페이지로 이동
     public void crawlDetailPage(){
 
         //상세페이지 link들을 가지고 와서 리스트에 저장.
-        List<WebElement> links = driver.findElements(By.xpath(linkTag));
+        List<WebElement> links = driver.findElements(By.xpath(tag.getLink()));
         List<String> linkHrefs = new ArrayList<>();
 
         for(WebElement link : links){
@@ -207,42 +163,54 @@ public class KurlyService extends CrawlingService{
     }
 
     //제품 디테일 페이지에서 상품정보 가지고 오기
-    public void getItemInfo(){
+    public void getItemInfo() {
 
-        String salesName = getDataByXpath(salesNameTag).getText();
+        String salesName = getDataByXpath(tag.getSalesName()).getText();
         System.out.println(salesName);
 
-        WebElement actualPrice = getDataByXpath(actualPriceTag);
-        if(actualPrice != null) {
-            System.out.println(actualPrice.getText());
-        } else {
-            System.out.println("일반가 없음");
+        try {
+            WebElement actualPrice = getDataByXpath(tag.getActualPrice());
+            if (actualPrice != null) {
+                System.out.println(actualPrice.getText());
+            } else {
+                System.out.println("일반가 없음");
+            }
+        }catch(Exception e){
+            throw new NullPointerException();
         }
 
-        WebElement discountPrice = getDataByXpath(discountPriceTag);
-        if(discountPrice != null) {
-            System.out.println(discountPrice.getText());
-        } else {
-            System.out.println("할인가 없음");
+        try {
+            WebElement discountPrice = getDataByXpath(tag.getDiscountPrice());
+            if (discountPrice != null) {
+                System.out.println(discountPrice.getText());
+            } else {
+                System.out.println("할인가 없음");
+            }
+        } catch (Exception e){
+            throw new NullPointerException();
         }
 
-        WebElement discountRate = getDataByXpath(discountRateTag);
-        if(discountRate != null) {
-            System.out.println(discountRate.getText());
-        } else {
-            System.out.println("할인률 없음");
+        try {
+            WebElement discountRate = getDataByXpath(tag.getDiscountRate());
+            if (discountRate != null) {
+                System.out.println(discountRate.getText());
+            } else {
+                System.out.println("할인률 없음");
+            }
+        } catch (Exception e){
+            throw new NullPointerException();
         }
 
         //이미지 가지고 오기
-        WebElement image = getDataByXpath(imageTag);
-        if(image != null){
+        WebElement image = getDataByXpath(tag.getImage());
+        if (image != null) {
             String imageStr = image.getAttribute("src");
             System.out.println(imageStr);
         } else {
             System.out.println("상품이미지를 찾을 수 없습니다.");
         }
 
-        WebElement nutritionFacts = getDataByXpath(nutritionFactImgTag);
+        WebElement nutritionFacts = getDataByXpath(tag.getNutriImage());
         if (nutritionFacts != null) {
             String nutritionFactsImg = nutritionFacts.getAttribute("src");
             System.out.println(nutritionFactsImg);
@@ -251,14 +219,7 @@ public class KurlyService extends CrawlingService{
         }
     }
 
-    public WebElement getDataByXpath(String tag){
-        try {
-            return driver.findElement(By.xpath(tag));
-        } catch(NoSuchElementException e){
-            System.out.println("요소를 찾지 못했습니다:" + tag);
-            return null;
-        }
-    }
+
 
 
 
