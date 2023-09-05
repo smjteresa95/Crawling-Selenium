@@ -51,13 +51,50 @@ public class SsgDataEntity {
     @Column(name = "product_name")
     private String productName;
 
-    @Column(name="serving_size")
-    private String servingSize;
+    @Column(name="quantity")
+    private String quantity;
 
     @Column(name="ingredients", columnDefinition = "TEXT")
     private String ingredients;
 
     @Column(name="nutri_facts", columnDefinition = "TEXT")
     private String nutriFacts;
+
+
+
+    @Column(name="report_num")
+    private String reportNum;
+
+    @Column(name="serving_size")
+    private String servingSize;
+
+    @Column(name="kcal")
+    private String kcal;
+
+    @Column(name="sodium")
+    private String sodium;
+
+    @Column(name="carb")
+    private String carb;
+
+    @Column(name="sugar")
+    private String sugar;
+
+    @Column(name="fat")
+    private String fat;
+
+    @Column(name="trans_fat")
+    private String transFat;
+
+    @Column(name="saturated_fat")
+    private String saturatedFat;
+
+    @Column(name="cholesterol")
+    private String cholesterol;
+
+    @Column(name="protein")
+    private String protein;
+
+
 
 }

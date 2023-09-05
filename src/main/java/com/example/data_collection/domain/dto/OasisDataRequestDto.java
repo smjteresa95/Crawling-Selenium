@@ -31,7 +31,7 @@ public class OasisDataRequestDto {
 
     private String productName;
 
-    private String servingSize;
+    private String quantity;
 
     private String ingredients;
 
@@ -50,7 +50,7 @@ public class OasisDataRequestDto {
                 .productLink(productLink)
                 .nutriImage(nutriImage)
                 .productName(productName)
-                .servingSize(servingSize)
+                .quantity(quantity)
                 .ingredients(ingredients)
                 .nutriFacts(nutriFacts)
                 .build();

@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -22,7 +23,7 @@ import java.util.regex.Pattern;
 public class OasisCrawlerService extends BaseCrawler {
 
     int currentPage = 1;
-    private HtmlConfig tag;
+    private final HtmlConfig tag;
     OasisDataRepository repository;
     private static final String SITE_NAME = "oasis";
 
@@ -159,8 +160,13 @@ public class OasisCrawlerService extends BaseCrawler {
                 throw new NoSuchElementException("요소를 찾을 수 없습니다.");
             }
 
-            //DB에 상품정보 저장
-            repository.save(dto.toEntity());
+            //nutri_image 와 nutri_facts 둘 다 존재 하지 않으면 DB에 저장 하지 않는다.
+            if(dto.getNutriFacts() == null && dto.getNutriImage() == null){
+                return;
+            } else {
+                //DB에 상품정보 저장
+                repository.save(dto.toEntity());
+            }
 
             //뒤로 돌아오기
             driver.navigate().back();
@@ -179,7 +185,7 @@ public class OasisCrawlerService extends BaseCrawler {
         }
     }
 
-    public void saveItemInfo(OasisDataRequestDto dto) {
+    public void saveItemInfo(OasisDataRequestDto dto) throws IOException {
 
         try {
             WebElement salesName = getDataByCss(tag.getSalesName());
@@ -252,6 +258,7 @@ public class OasisCrawlerService extends BaseCrawler {
             String imageStr = image.getAttribute("src");
             dto.setImage(imageStr);
             System.out.println(imageStr);
+
         } else {
             dto.setImage(null);
             System.out.println("상품이미지를 찾을 수 없습니다.");
@@ -312,11 +319,11 @@ public class OasisCrawlerService extends BaseCrawler {
                 System.out.println(entry.getValue());
 
             } else if (Objects.equals(entry.getKey(), "용량/수량/크기")){
-                dto.setServingSize(entry.getValue());
+                dto.setQuantity(entry.getValue());
                 System.out.println(entry.getValue());
 
             } else if (Objects.equals(entry.getKey(), "용량/수량")){
-                dto.setServingSize(entry.getValue());
+                dto.setQuantity(entry.getValue());
                 System.out.println(entry.getValue());
 
             } else if(Objects.equals(entry.getKey(),"원재료 및 함량")){

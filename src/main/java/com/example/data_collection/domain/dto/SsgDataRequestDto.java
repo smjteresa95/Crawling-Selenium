@@ -32,7 +32,7 @@ public class SsgDataRequestDto {
 
     private String productName;
 
-    private String servingSize;
+    private String quantity;
 
     private String ingredients;
 
@@ -51,7 +51,7 @@ public class SsgDataRequestDto {
                 .productLink(productLink)
                 .nutriImage(nutriImage)
                 .productName(productName)
-                .servingSize(servingSize)
+                .quantity(quantity)
                 .ingredients(ingredients)
                 .nutriFacts(nutriFacts)
                 .build();
