@@ -23,7 +23,7 @@ public class SsgDataEntity {
     @Column(name= "subcategory_name")
     private String subcategoryName;
 
-    @Column(name = "sales_name")
+    @Column(unique = true, name = "sales_name")
     private String salesName;
 
     @Column(name = "actual_price")
@@ -47,7 +47,6 @@ public class SsgDataEntity {
     @Column(name="nutri_image")
     private String nutriImage;
 
-
     @Column(name = "product_name")
     private String productName;
 
@@ -59,8 +58,6 @@ public class SsgDataEntity {
 
     @Column(name="nutri_facts", columnDefinition = "TEXT")
     private String nutriFacts;
-
-
 
     @Column(name="report_num")
     private String reportNum;

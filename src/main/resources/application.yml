@@ -1,8 +1,9 @@
 spring:
   profiles:
-    active: db, api
+    active: db
   jpa:
     hibernate:
       ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQL8Dialect
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver

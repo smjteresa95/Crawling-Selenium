@@ -23,7 +23,7 @@ public class OasisDataEntity{
     @Column(name= "subcategory_name")
     private String subcategoryName;
 
-    @Column(name = "sales_name")
+    @Column(unique = true, name = "sales_name")
     private String salesName;
 
     @Column(name = "actual_price")
@@ -48,7 +48,6 @@ public class OasisDataEntity{
 
     @Column(name="nutri_image")
     private String nutriImage;
-
 
     @Column(name = "product_name")
     private String productName;

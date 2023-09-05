@@ -150,8 +150,12 @@ public class SsgCrawlerService extends BaseCrawler {
             if(dto.getNutriFacts() == null && dto.getNutriImage() == null){
                 return;
             } else {
-                //DB에 상품정보 저장
-                repository.save(dto.toEntity());
+                try {
+                    //DB에 상품정보 저장
+                    repository.save(dto.toEntity());
+                } catch (Exception e){
+                    System.err.println("Unexpected error: " + e.getMessage());
+                }
             }
 
             //뒤로 돌아오기
@@ -202,7 +206,7 @@ public class SsgCrawlerService extends BaseCrawler {
 
         }
 
-       return tableData;
+        return tableData;
     }
 
     public void saveItemInfoFromTable(SsgDataRequestDto dto){
@@ -327,6 +331,5 @@ public class SsgCrawlerService extends BaseCrawler {
 
 
 }
-
 
 
