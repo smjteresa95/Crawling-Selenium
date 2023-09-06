@@ -252,6 +252,9 @@ public class SsgCrawlerService extends BaseCrawler {
     //제품 디테일 페이지에서 상품정보 가지고 오기
     public void getItemInfo(SsgDataRequestDto dto){
 
+        //제품 판매 사이트 저장
+        dto.setSite(SITE_NAME);
+
         String salesName = getDataByXpath(tag.getSalesName()).getText();
         dto.setSalesName(salesName);
         System.out.println(salesName);

@@ -17,6 +17,10 @@ public class SsgDataEntity {
     @Column(name = "product_id")
     private long productId;
 
+    //상품 판매처
+    @Column(name="site")
+    private String site;
+
     @Column(name = "category_name")
     private String categoryName;
 
@@ -44,7 +48,7 @@ public class SsgDataEntity {
     @Column(name="product_link", columnDefinition = "TEXT")
     private String productLink;
 
-    @Column(name="nutri_image")
+    @Column(name="nut_image")
     private String nutriImage;
 
     @Column(name = "product_name")
@@ -63,34 +67,34 @@ public class SsgDataEntity {
     private String reportNum;
 
     @Column(name="serving_size")
-    private String servingSize;
+    private double servingSize;
 
     @Column(name="kcal")
-    private String kcal;
+    private double kcal;
 
     @Column(name="sodium")
-    private String sodium;
+    private double sodium;
 
-    @Column(name="carb")
-    private String carb;
+    @Column(name="carbohydrate")
+    private double carb;
 
     @Column(name="sugar")
-    private String sugar;
+    private double sugar;
 
     @Column(name="fat")
-    private String fat;
+    private double fat;
 
     @Column(name="trans_fat")
-    private String transFat;
+    private double transFat;
 
     @Column(name="saturated_fat")
-    private String saturatedFat;
+    private double saturatedFat;
 
     @Column(name="cholesterol")
-    private String cholesterol;
+    private double cholesterol;
 
     @Column(name="protein")
-    private String protein;
+    private double protein;
 
 
 

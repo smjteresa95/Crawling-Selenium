@@ -9,6 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 public class OasisDataRequestDto {
 
+    private String site;
+
     private String categoryName;
 
     private String subcategoryName;
@@ -39,6 +41,7 @@ public class OasisDataRequestDto {
 
     public OasisDataEntity toEntity(){
         return OasisDataEntity.builder()
+                .site(site)
                 .categoryName(categoryName)
                 .subcategoryName(subcategoryName)
                 .salesName(salesName)

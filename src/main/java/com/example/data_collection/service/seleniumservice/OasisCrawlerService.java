@@ -191,6 +191,9 @@ public class OasisCrawlerService extends BaseCrawler {
 
     public void saveItemInfo(OasisDataRequestDto dto) throws IOException {
 
+        //제품 판매 사이트 저장
+        dto.setSite(SITE_NAME);
+
         try {
             WebElement salesName = getDataByCss(tag.getSalesName());
             String salesNameStr = salesName.getText();

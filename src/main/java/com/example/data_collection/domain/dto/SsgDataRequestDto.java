@@ -10,6 +10,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 public class SsgDataRequestDto {
+
+    private String site;
+
     private String categoryName;
 
     private String subcategoryName;
@@ -40,6 +43,7 @@ public class SsgDataRequestDto {
 
     public SsgDataEntity toEntity(){
         return SsgDataEntity.builder()
+                .site(site)
                 .categoryName(categoryName)
                 .subcategoryName(subcategoryName)
                 .salesName(salesName)
