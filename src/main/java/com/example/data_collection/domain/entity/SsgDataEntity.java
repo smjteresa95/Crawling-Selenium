@@ -27,7 +27,7 @@ public class SsgDataEntity {
     @Column(name= "subcategory_name")
     private String subcategoryName;
 
-    @Column(unique = true, name = "sales_name")
+    @Column(name = "sales_name")
     private String salesName;
 
     @Column(name = "actual_price")

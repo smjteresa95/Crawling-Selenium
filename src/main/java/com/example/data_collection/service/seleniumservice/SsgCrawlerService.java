@@ -3,6 +3,7 @@ package com.example.data_collection.service.seleniumservice;
 import com.example.data_collection.config.HtmlConfig;
 import com.example.data_collection.config.HtmlConfigFactory;
 import com.example.data_collection.domain.dto.SsgDataRequestDto;
+import com.example.data_collection.domain.entity.SsgDataEntity;
 import com.example.data_collection.domain.entity.SsgDataRepository;
 import com.example.data_collection.util.CategoryCodes;
 import org.openqa.selenium.*;
@@ -136,25 +137,33 @@ public class SsgCrawlerService extends BaseCrawler {
             try {
                 getItemInfo(dto);
             }catch (Exception e){
-                throw new NoSuchElementException("요소를 찾을 수 없습니다.");
+                System.err.println("Unexpected error: " + e.getMessage());
             }
 
             //상품필수정보 표에 있는 값 가지고 오기
             try {
                 saveItemInfoFromTable(dto);
             } catch(Exception e){
-                throw new NoSuchElementException("요소를 찾을 수 없습니다.");
+                System.err.println("Unexpected error: " + e.getMessage());
             }
+
+            //DB에 해당 salesName 이 존재하는 지 체크한다.
+            Optional<SsgDataEntity> existingEntity = repository.findBySalesName(dto.getSalesName());
+
 
             //nutri_image 와 nutri_facts 둘 다 존재 하지 않으면 DB에 저장 하지 않는다.
             if(dto.getNutriFacts() == null && dto.getNutriImage() == null){
                 return;
             } else {
-                try {
-                    //DB에 상품정보 저장
-                    repository.save(dto.toEntity());
-                } catch (Exception e){
-                    System.err.println("Unexpected error: " + e.getMessage());
+                if(existingEntity.isEmpty()) {
+                    try {
+                        //DB에 상품정보 저장
+                        repository.save(dto.toEntity());
+                    } catch (Exception e) {
+                        System.err.println("Unexpected error: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("sales name " + dto.getSalesName() + " is already in the database.");
                 }
             }
 
@@ -215,8 +224,15 @@ public class SsgCrawlerService extends BaseCrawler {
 
         for(Map.Entry<String, String> entry: tableData.entrySet()){
             if(Objects.equals(entry.getKey(), "품명 및 모델명")){
-                dto.setProductName(entry.getValue());
-                System.out.println(entry.getValue());
+                String product_name = entry.getValue();
+
+                if (product_name.contains("상세설명참조")
+                        || product_name.contains("[상세설명참조]")
+                        || product_name.contains("상세정보참고")) {
+                    continue;
+                }
+                dto.setProductName(product_name);
+                System.out.println(product_name);
 
             } else if (Objects.equals(entry.getKey(), "포장 단위별 내용물의 용량 (중량), 수량, 크기")){
                 dto.setQuantity(entry.getValue());

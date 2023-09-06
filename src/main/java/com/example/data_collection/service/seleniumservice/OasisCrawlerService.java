@@ -3,7 +3,9 @@ package com.example.data_collection.service.seleniumservice;
 import com.example.data_collection.config.HtmlConfig;
 import com.example.data_collection.config.HtmlConfigFactory;
 import com.example.data_collection.domain.dto.OasisDataRequestDto;
+import com.example.data_collection.domain.entity.OasisDataEntity;
 import com.example.data_collection.domain.entity.OasisDataRepository;
+import com.example.data_collection.domain.entity.SsgDataEntity;
 import com.example.data_collection.util.CategoryCodes;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
@@ -79,6 +81,8 @@ public class OasisCrawlerService extends BaseCrawler {
             }
         }
     }
+
+
 
     //소분류 카테고리 얻어내는 메서드
     public String getSubCategoryByCode(int code){
@@ -160,15 +164,25 @@ public class OasisCrawlerService extends BaseCrawler {
                 throw new NoSuchElementException("요소를 찾을 수 없습니다.");
             }
 
+
+
+            //DB에 해당 salesName 이 존재하는 지 체크한다.
+            Optional<OasisDataEntity> existingEntity = repository.findBySalesName(dto.getSalesName());
+
             //nutri_image 와 nutri_facts 둘 다 존재 하지 않으면 DB에 저장 하지 않는다.
             if(dto.getNutriFacts() == null && dto.getNutriImage() == null){
                 return;
             } else {
-                try {
-                    //DB에 상품정보 저장
-                    repository.save(dto.toEntity());
-                } catch (Exception e){
-                    System.err.println("Unexpected error: " + e.getMessage());
+                // 중복되는 sale name을 가지지 않았다면
+                if(existingEntity.isEmpty()) {
+                    try {
+                        //DB에 상품정보 저장
+                        repository.save(dto.toEntity());
+                    } catch (Exception e) {
+                        System.err.println("Unexpected error: " + e.getMessage());
+                    }
+                } else {
+                    System.out.println("sales name " + dto.getSalesName() + " is already in the database.");
                 }
             }
 
@@ -322,8 +336,15 @@ public class OasisCrawlerService extends BaseCrawler {
 
         for(Map.Entry<String, String> entry: tableData.entrySet()){
             if(Objects.equals(entry.getKey(), "상품명")){
-                dto.setProductName(entry.getValue());
-                System.out.println(entry.getValue());
+                String product_name = entry.getValue();
+
+                if (product_name.contains("상세설명참조")
+                        || product_name.contains("[상세설명참조]")
+                        || product_name.contains("상세정보참고")) {
+                    continue;
+                }
+                dto.setProductName(product_name);
+                System.out.println(product_name);
 
             } else if (Objects.equals(entry.getKey(), "용량/수량/크기")){
                 dto.setQuantity(entry.getValue());
