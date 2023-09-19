@@ -1,7 +1,6 @@
 package com.example.data_collection.domain.dto;
 
-import com.example.data_collection.domain.entity.OasisDataEntity;
-import com.example.data_collection.domain.entity.SsgDataEntity;
+import com.example.data_collection.domain.entity.RawData;
 import lombok.*;
 
 @Setter
@@ -41,8 +40,8 @@ public class SsgDataRequestDto {
 
     private String nutriFacts;
 
-    public SsgDataEntity toEntity(){
-        return SsgDataEntity.builder()
+    public RawData toEntity(){
+        return RawData.builder()
                 .site(site)
                 .categoryName(categoryName)
                 .subcategoryName(subcategoryName)

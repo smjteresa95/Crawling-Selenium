@@ -3,8 +3,8 @@ package com.example.data_collection.service.seleniumservice;
 import com.example.data_collection.config.HtmlConfig;
 import com.example.data_collection.config.HtmlConfigFactory;
 import com.example.data_collection.domain.dto.SsgDataRequestDto;
-import com.example.data_collection.domain.entity.SsgDataEntity;
-import com.example.data_collection.domain.entity.SsgDataRepository;
+import com.example.data_collection.domain.entity.RawData;
+import com.example.data_collection.domain.entity.RawDataRepository;
 import com.example.data_collection.util.CategoryCodes;
 import org.openqa.selenium.*;
 import org.openqa.selenium.NoSuchElementException;
@@ -21,7 +21,7 @@ public class SsgCrawlerService extends BaseCrawler {
 
     int currentPage = 1;
 
-    private final SsgDataRepository repository;
+    private final RawDataRepository repository;
 
     private final HtmlConfig tag;
     private static final String SITE_NAME = "ssg";
@@ -31,7 +31,7 @@ public class SsgCrawlerService extends BaseCrawler {
     @Autowired
     public SsgCrawlerService(WebDriver driver,
                              HtmlConfigFactory tag,
-                             SsgDataRepository repository,
+                             RawDataRepository repository,
                              CategoryCodes categoryCodes) throws IllegalAccessException {
         super(driver);
         this.tag = tag.getTagForSite(SITE_NAME);
@@ -148,7 +148,7 @@ public class SsgCrawlerService extends BaseCrawler {
             }
 
             //DB에 해당 salesName 이 존재하는 지 체크한다.
-            Optional<SsgDataEntity> existingEntity = repository.findBySalesName(dto.getSalesName());
+            Optional<RawData> existingEntity = repository.findBySalesName(dto.getSalesName());
 
 
             //nutri_image 와 nutri_facts 둘 다 존재 하지 않으면 DB에 저장 하지 않는다.

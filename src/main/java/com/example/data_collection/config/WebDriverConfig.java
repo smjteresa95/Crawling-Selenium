@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 @Configuration
@@ -15,7 +18,8 @@ public class WebDriverConfig {
 
     @Bean
     public WebDriver webDriver(){
-        System.setProperty("webdriver.chrome.driver", "C:\\Users\\msong\\Desktop\\Bootcamp\\bitcamp\\Project KINNI\\data_collection\\chromedriver.exe");
+        Path path = Paths.get("./chromedriver.exe");
+        System.setProperty("webdriver.chrome.driver", path.toAbsolutePath().toString());
         return new ChromeDriver(getOptions());
     }
 
