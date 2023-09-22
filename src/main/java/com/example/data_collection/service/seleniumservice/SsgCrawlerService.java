@@ -2,7 +2,7 @@ package com.example.data_collection.service.seleniumservice;
 
 import com.example.data_collection.config.HtmlConfig;
 import com.example.data_collection.config.HtmlConfigFactory;
-import com.example.data_collection.domain.dto.SsgDataRequestDto;
+import com.example.data_collection.domain.dto.RawDataRequestDto;
 import com.example.data_collection.domain.entity.RawData;
 import com.example.data_collection.domain.entity.RawDataRepository;
 import com.example.data_collection.util.CategoryCodes;
@@ -113,13 +113,13 @@ public class SsgCrawlerService extends BaseCrawler {
     //제품 디테일 페이지로 이동
     public void crawlDetailPage(List<String> linkHrefs, String code){
 
-        SsgDataRequestDto dto;
+        RawDataRequestDto dto;
 
 
         //for문 돌리면서 하나를 실행시키고
 
         for(String href : linkHrefs){
-            dto = new SsgDataRequestDto();
+            dto = new RawDataRequestDto();
 
             //대분류 카테고리명 저장
             dto.setCategoryName(getLargeCategoryByCode(code));
@@ -218,7 +218,7 @@ public class SsgCrawlerService extends BaseCrawler {
         return tableData;
     }
 
-    public void saveItemInfoFromTable(SsgDataRequestDto dto){
+    public void saveItemInfoFromTable(RawDataRequestDto dto){
 
         Map<String, String> tableData = getItemInfoFromTable();
 
@@ -266,7 +266,7 @@ public class SsgCrawlerService extends BaseCrawler {
 
 
     //제품 디테일 페이지에서 상품정보 가지고 오기
-    public void getItemInfo(SsgDataRequestDto dto){
+    public void getItemInfo(RawDataRequestDto dto){
 
         //제품 판매 사이트 저장
         dto.setSite(SITE_NAME);

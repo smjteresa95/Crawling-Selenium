@@ -13,8 +13,8 @@ public class RawData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "product_id")
-    private long productId;
+    @Column(name = "rawdata_id")
+    private long rawdataId;
 
     //상품 판매처
     @Column(name="site")
@@ -38,8 +38,6 @@ public class RawData {
     @Column(name="discount_rate")
     private int discountRate;
 
-    // rating의 경우 값을 가지고 올 수 없는 사이트가 있다.
-    // 참조 데이터 타입을 써야 null을 넣는게 가능하다.
     @Column(name="rating", nullable = true)
     private Double rating;
 
@@ -96,7 +94,5 @@ public class RawData {
 
     @Column(name="protein")
     private double protein;
-
-
 
 }
