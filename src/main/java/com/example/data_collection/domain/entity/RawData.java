@@ -66,33 +66,33 @@ public class RawData {
     private String reportNum;
 
     @Column(name="serving_size")
-    private double servingSize;
+    private Double servingSize;
 
     @Column(name="kcal")
-    private double kcal;
+    private Double kcal;
 
     @Column(name="sodium")
-    private double sodium;
+    private Double sodium;
 
     @Column(name="carbohydrate")
-    private double carb;
+    private Double carb;
 
     @Column(name="sugar")
-    private double sugar;
+    private Double sugar;
 
     @Column(name="fat")
-    private double fat;
+    private Double fat;
 
     @Column(name="trans_fat")
-    private double transFat;
+    private Double transFat;
 
     @Column(name="saturated_fat")
-    private double saturatedFat;
+    private Double saturatedFat;
 
     @Column(name="cholesterol")
-    private double cholesterol;
+    private Double cholesterol;
 
     @Column(name="protein")
-    private double protein;
+    private Double protein;
 
 }

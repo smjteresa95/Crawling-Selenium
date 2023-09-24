@@ -132,6 +132,7 @@ public class OasisCrawlerService extends BaseCrawler {
         for (String href : linkHrefs) {
             dto = new RawDataRequestDto();
             //대분류 카테고리명 저장
+            System.out.println(getLargeCategoryByCode(code));
             dto.setCategoryName(getLargeCategoryByCode(code));
 
             //소분류 카테고리명 저장
