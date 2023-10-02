@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.*;
 
 @Service
-@Order(1)
+@Order(2)
 public class SsgCrawlerService extends BaseCrawler {
 
 
@@ -106,7 +106,6 @@ public class SsgCrawlerService extends BaseCrawler {
                 linkHrefs.add(link.getAttribute("href"));
             }
         }
-        System.out.println("한 페이지에 존재하는 상품 갯수: " + linkHrefs.size());
         return linkHrefs;
     }
 
@@ -129,7 +128,6 @@ public class SsgCrawlerService extends BaseCrawler {
 
             //dto에 링크를 저장
             dto.setProductLink(href);
-            System.out.println(href);
 
             driver.navigate().to(href);
 

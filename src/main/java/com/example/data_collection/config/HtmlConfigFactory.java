@@ -44,8 +44,10 @@ public class HtmlConfigFactory {
                         .image("//*[@id=\"mainImg\"]")
                         .nutriImage("//*[@id=\"wrap_ifr\"]/div/div[2]/div/div/div[3]/img[contains(@alt, '품질표시이미지') or contains(@alt, '품질표시이미지1') or contains(@alt, '품질표시이미지2')]" +
                                         " | //*[@id=\"wrap_ifr\"]/div/div[4]/div/div/div[2]/img[contains(@alt, '품질표시이미지') or contains(@alt, '품질표시이미지1') or contains(@alt, '품질표시이미지2')]" +
-                                        " | //*[@id=\"wrap_ifr\"]/div/div[3]/div/div/div[2]/img[contains(@alt, '품질표시이미지') or contains(@alt, '품질표시이미지1') or contains(@alt, '품질표시이미지2')]"
-                                )
+                                        " | //*[@id=\"wrap_ifr\"]/div/div[3]/div/div/div[2]/img[contains(@alt, '품질표시이미지') or contains(@alt, '품질표시이미지1') or contains(@alt, '품질표시이미지2')]" +
+                                        " | //*[@id=\"wrap_ifr\"]/div/div[2]/div/div/div[2]/img[contains(@alt, '품질표시이미지') or contains(@alt, '품질표시이미지1') or contains(@alt, '품질표시이미지2')]"
+
+                        )
 
                         .iframe("_ifr_html")
                         .tablePath("//div[@class='cdtl_sec']/div[@class='cdtl_cont_info']//table/tbody")

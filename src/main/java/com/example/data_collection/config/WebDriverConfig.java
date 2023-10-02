@@ -31,7 +31,9 @@ public class WebDriverConfig {
     public ChromeOptions getOptions(){
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--lang=ko_KR");
-        options.addArguments("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36");
+        //Chrome > 개발자 모드 > console > navigator.userAgent
+        options.addArguments("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+        );
         return options;
     }
 }

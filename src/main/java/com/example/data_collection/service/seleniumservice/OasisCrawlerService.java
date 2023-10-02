@@ -18,16 +18,14 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
 @Service
-@Order(2)
+@Order(1)
 public class OasisCrawlerService extends BaseCrawler {
 
     int currentPage = 1;
     private final HtmlConfig tag;
     RawDataRepository repository;
     private static final String SITE_NAME = "oasis";
-
     CategoryCodes categoryCodes;
 
 
@@ -45,9 +43,8 @@ public class OasisCrawlerService extends BaseCrawler {
 
 
 
-
     @Override
-    public void startCrawling(){
+    public void startCrawling() throws InterruptedException {
 
         Map<String, Integer> oasisCodeMap = categoryCodes.getOASIS();
         List<Integer> categoryCodes = new ArrayList<>(oasisCodeMap.values());
@@ -55,13 +52,12 @@ public class OasisCrawlerService extends BaseCrawler {
         for(Integer code : categoryCodes) {
 
             String baseUrl = tag.getSiteUrl()+ code;
-            System.out.println(baseUrl);
 
             driver.get(baseUrl);
 
             while(true){
 
-                System.out.println("현재 카테고리: " + code);
+                Thread.sleep(5);
                 List<String> hrefLinks = getProductDetailLinks();
 
                 if(!hrefLinks.isEmpty()) {
@@ -117,7 +113,6 @@ public class OasisCrawlerService extends BaseCrawler {
             linkHrefs.add(link.getAttribute("href"));
         }
 
-        System.out.println("한 페이지에 존재하는 상품 갯수: " + linkHrefs.size());
         return linkHrefs;
 
     }
@@ -132,7 +127,7 @@ public class OasisCrawlerService extends BaseCrawler {
         for (String href : linkHrefs) {
             dto = new RawDataRequestDto();
             //대분류 카테고리명 저장
-            System.out.println(getLargeCategoryByCode(code));
+            System.out.println("카테고리: " + getLargeCategoryByCode(code));
             dto.setCategoryName(getLargeCategoryByCode(code));
 
             //소분류 카테고리명 저장
@@ -165,8 +160,7 @@ public class OasisCrawlerService extends BaseCrawler {
             }
 
 
-
-            //DB에 해당 salesName 이 존재하는 지 체크한다.
+            //DB에 해당 salesName 이 존재하는지 체크한다.
             Optional<RawData> existingEntity = repository.findBySalesName(dto.getSalesName());
 
             //nutri_image 와 nutri_facts 둘 다 존재 하지 않으면 DB에 저장 하지 않는다.
@@ -182,7 +176,7 @@ public class OasisCrawlerService extends BaseCrawler {
                         System.err.println("Unexpected error: " + e.getMessage());
                     }
                 } else {
-                    System.out.println("sales name " + dto.getSalesName() + " is already in the database.");
+                    System.out.println("상품명: " + dto.getSalesName() + " DB에 있는 상품과 중복됩니다.");
                 }
             }
 
@@ -214,7 +208,7 @@ public class OasisCrawlerService extends BaseCrawler {
 
             if (!salesNameStr.isEmpty()) {
                 dto.setSalesName(salesNameStr);
-                System.out.println(salesNameStr);
+                System.out.println("판매명: " + salesNameStr);
             } else {
                 dto.setSalesName(null);
             }
@@ -229,7 +223,7 @@ public class OasisCrawlerService extends BaseCrawler {
             if (!actualPrice.getText().isEmpty()) {
                 //쉼표 제외하고 int형으로 변경
                 dto.setActualPrice(Integer.parseInt(actualPrice.getText().replaceAll("[^0-9]", "")));
-                System.out.println(Integer.parseInt(actualPrice.getText().replaceAll("[^0-9]", "")));
+                System.out.println("가격: " + Integer.parseInt(actualPrice.getText().replaceAll("[^0-9]", "")));
             } else {
                 dto.setActualPrice(0);
             }
@@ -244,7 +238,7 @@ public class OasisCrawlerService extends BaseCrawler {
             String discountPriceStr = discountPrice.getText().replaceAll("[^0-9]", "");
             if(!discountPriceStr.isEmpty()) {
                 dto.setDiscountPrice(Integer.parseInt(discountPriceStr));
-                System.out.println(Integer.parseInt(discountPriceStr));
+                System.out.println("할인가: " + Integer.parseInt(discountPriceStr));
             } else{
                 dto.setDiscountPrice(0);
             }
@@ -256,7 +250,7 @@ public class OasisCrawlerService extends BaseCrawler {
         try{
             WebElement discountRate = getDataByCss(tag.getDiscountRate());
             dto.setDiscountRate(Integer.parseInt(discountRate.getText().replace("%","")));
-            System.out.println(Integer.parseInt(discountRate.getText().replace("%","")));
+            System.out.println("할인률: " + Integer.parseInt(discountRate.getText().replace("%","")));
         } catch(Exception e) {
             dto.setDiscountRate(0);
             System.out.println("할인률 없음");
@@ -267,7 +261,7 @@ public class OasisCrawlerService extends BaseCrawler {
         try {
             WebElement rating = getDataByClass(tag.getRating());
             dto.setRating(getRating(rating.getText()));
-            System.out.println(getRating(rating.getText()));
+            System.out.println("평점: " + getRating(rating.getText()));
         } catch (Exception e){
             dto.setRating(0.0);
             System.out.println("평점 없음");
@@ -278,7 +272,7 @@ public class OasisCrawlerService extends BaseCrawler {
         if (image != null) {
             String imageStr = image.getAttribute("src");
             dto.setImage(imageStr);
-            System.out.println(imageStr);
+            System.out.println("이미지: " + imageStr);
 
         } else {
             dto.setImage(null);
@@ -289,7 +283,7 @@ public class OasisCrawlerService extends BaseCrawler {
         if (nutritionFacts != null) {
             String nutritionFactsImg = nutritionFacts.getAttribute("src");
             dto.setNutriImage(nutritionFactsImg);
-            System.out.println(nutritionFactsImg);
+            System.out.println("성분이미지: " + nutritionFactsImg);
         } else {
             dto.setNutriImage(null);
             System.out.println("성분이미지를 찾을 수 없습니다.");
@@ -324,7 +318,7 @@ public class OasisCrawlerService extends BaseCrawler {
                         tableData.put(title, value);
                     }
                 } catch (NoSuchElementException e) {
-                    System.out.println("No value nor title found: " + row.getText());
+                    System.out.println("해당 값이 존재하지 않습니다: ");
                 }
         }
         return tableData;
@@ -344,23 +338,23 @@ public class OasisCrawlerService extends BaseCrawler {
                     continue;
                 }
                 dto.setProductName(product_name);
-                System.out.println(product_name);
+                System.out.println("상품명: "+ product_name);
 
             } else if (Objects.equals(entry.getKey(), "용량/수량/크기")){
                 dto.setQuantity(entry.getValue());
-                System.out.println(entry.getValue());
+                System.out.println("용량/수량/크기: " + entry.getValue());
 
             } else if (Objects.equals(entry.getKey(), "용량/수량")){
                 dto.setQuantity(entry.getValue());
-                System.out.println(entry.getValue());
+                System.out.println("용량/수량:" + entry.getValue());
 
             } else if(Objects.equals(entry.getKey(),"원재료 및 함량")){
                 dto.setIngredients(entry.getValue());
-                System.out.println(entry.getValue());
+                System.out.println("원재료 및 함량: " + entry.getValue());
 
             } else if(Objects.equals(entry.getKey(), "영양성분")){
                 dto.setNutriFacts(entry.getValue());
-                System.out.println(entry.getValue());
+                System.out.println("영양성분: " + entry.getValue());
             }
         }
 
