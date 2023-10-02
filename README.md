@@ -1,5 +1,5 @@
 # Crawling-Selenium
-Crawling data from the website using Selenium and JSOUP test
+Crawling data from the website using Selenium
 
 <h3 align="center"></h3>
 
